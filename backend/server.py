@@ -12,6 +12,12 @@ from src.cert_engine import ingest_data_v2, DB_PATH
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+app = FastAPI(
+    title="SOC Anomaly Detector API",
+    description="REST backend for the Insider-Threat UEBA Dashboard",
+    version="1.0.0"
+)
+
 # Ensure backend root is on sys.path
 BACKEND_ROOT = Path(__file__).resolve().parent
 if str(BACKEND_ROOT) not in sys.path:
@@ -33,12 +39,6 @@ def startup_event():
         print("Ingesting data_v2 dataset. This may take a moment...")
         ingest_data_v2()
         print("Ingestion complete!")
-
-app = FastAPI(
-    title="SOC Anomaly Detector API",
-    description="REST backend for the Insider-Threat UEBA Dashboard",
-    version="1.0.0"
-)
 
 # Enable CORS for the frontend Vite development server (localhost:5173) and any origin
 app.add_middleware(
