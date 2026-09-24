@@ -1,8 +1,3 @@
-# Documentation exclusion
-README.md
-README*
-*.md
-
 # Python bytecode and cache
 __pycache__/
 *.py[cod]
@@ -34,3 +29,11 @@ cert_data/*.db
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# Frontend
+node_modules/
+dist/
+
+# Environment variables
+*.env
+.env.*
