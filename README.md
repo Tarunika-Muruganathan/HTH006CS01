@@ -1,4 +1,4 @@
-# CyberShield — Member 3 Frontend
+# CyberShield —Frontend
 
 Polished React 18 + Vite + Tailwind SOC dashboard for **Explainable Insider-Threat Anomaly Detector (HTH-CS-07)**.
 
