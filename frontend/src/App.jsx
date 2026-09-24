@@ -67,6 +67,7 @@ export default function App() {
   const [backendOnline, setBackendOnline] = useState(null)
   const [lastSync, setLastSync] = useState(null)
   const [notice, setNotice] = useState(null)
+  const [datasetSummary, setDatasetSummary] = useState(null)
 
   const showNotice = useCallback((message, tone = 'info') => {
     setNotice({ message, tone })
@@ -189,8 +190,22 @@ export default function App() {
           </div>
         </motion.div>
 
-        {/* Dataset Upload */}
-        <DatasetUpload onLoad={(items) => setIncidents(items)} />
+        {/* Optional customer dataset analysis — the regular CERT dashboard remains the default. */}
+        <DatasetUpload onLoad={(items, summary) => {
+          setIncidents(items)
+          setDatasetSummary(summary ?? null)
+          setSelectedIncident(items[0] ?? null)
+          showNotice(`Dataset analysis complete · ${items.length} records loaded`, 'LOW')
+        }} />
+
+        {datasetSummary && (
+          <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-cyan-500/15 bg-cyan-500/[0.05] px-4 py-3 text-xs text-cyan-100">
+            <span className="font-semibold">Uploaded dataset active</span>
+            <span>{datasetSummary.records_analyzed} records analysed</span>
+            <span>{datasetSummary.high_risk_records} high-priority records</span>
+            <button type="button" className="ml-auto font-semibold text-cyan-300 underline underline-offset-4 hover:text-white" onClick={() => { setDatasetSummary(null); setIncidents(demoIncidents); setSelectedIncident(null) }}>Return to CERT dashboard</button>
+          </div>
+        )}
 
         {/* View Content */}
         <AnimatePresence mode="wait">

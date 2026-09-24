@@ -4,10 +4,13 @@ Serves live alerts, simulation injection, and step-up verification for the React
 """
 
 import sys
+import csv
+import json
+import os
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, HTTPException, UploadFile, File
-from src.customer_analysis import analyze_customer_dataset
+from src.customer_analysis import analyze_customer_dataset, analyze_uploaded_dataset
 from src.cert_engine import ingest_data_v2, DB_PATH
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -275,10 +278,23 @@ def verify_otp(request: VerificationRequest):
 
 @app.post("/api/dataset/analyze")
 async def analyze_dataset(file: UploadFile = File(...)):
+    if not file.filename or not file.filename.lower().endswith((".csv", ".json", ".txt")):
+        raise HTTPException(status_code=400, detail="Upload a CSV, JSON, or TXT dataset export.")
     content = await file.read()
-    text_content = content.decode("utf-8")
-    report = analyze_customer_dataset(text_content)
-    return {"report": report}
+    try:
+        text_content = content.decode("utf-8-sig")
+        result = analyze_uploaded_dataset(text_content, file.filename)
+    except (UnicodeDecodeError, ValueError, json.JSONDecodeError, csv.Error) as exc:
+        raise HTTPException(status_code=400, detail=f"We could not read this dataset: {exc}") from exc
+
+    # Gemini is optional. Deterministic incident scoring is always returned so the
+    # dashboard remains usable without a configured cloud key.
+    if os.environ.get("GEMINI_API_KEY"):
+        try:
+            result["ai_summary"] = analyze_customer_dataset(text_content[:100_000])
+        except Exception as exc:
+            result["ai_summary_error"] = f"AI narrative unavailable: {exc}"
+    return result
 
 if __name__ == "__main__":
     import uvicorn

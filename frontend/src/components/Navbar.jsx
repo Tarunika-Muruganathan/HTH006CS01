@@ -86,7 +86,7 @@ export default function Navbar({ activeView, onNavigate, onSimulation, simulatin
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <h1 className="truncate font-mono text-base font-black tracking-[0.1em] text-white sm:text-lg">
-                    CYBERSHIELD
+                    SOC MONITOR
                   </h1>
                   <span className="rounded-md border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 font-mono text-[9px] font-bold tracking-[0.14em] text-slate-500">
                     HTH-CS-07
