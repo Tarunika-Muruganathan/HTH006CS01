@@ -6,7 +6,9 @@ Serves live alerts, simulation injection, and step-up verification for the React
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from src.customer_analysis import analyze_customer_dataset
+from src.cert_engine import ingest_data_v2, DB_PATH
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -23,6 +25,14 @@ from src.cert_engine import (
     get_audit_history,
     SCENARIO_DEFINITIONS,
 )
+
+
+@app.on_event("startup")
+def startup_event():
+    if not DB_PATH.exists():
+        print("Ingesting data_v2 dataset. This may take a moment...")
+        ingest_data_v2()
+        print("Ingestion complete!")
 
 app = FastAPI(
     title="SOC Anomaly Detector API",
@@ -261,6 +271,14 @@ def verify_otp(request: VerificationRequest):
             "message": msg or "Invalid verification code. Please try again.",
             "user_id": uid,
         }
+
+
+@app.post("/api/dataset/analyze")
+async def analyze_dataset(file: UploadFile = File(...)):
+    content = await file.read()
+    text_content = content.decode("utf-8")
+    report = analyze_customer_dataset(text_content)
+    return {"report": report}
 
 if __name__ == "__main__":
     import uvicorn
