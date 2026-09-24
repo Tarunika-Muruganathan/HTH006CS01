@@ -649,5 +649,4 @@ Return a single JSON object strictly matching the requested schema.
         )
 
 
-# Backward-compatible alias
-GeminiThreatDetector = ThreatDetector
+

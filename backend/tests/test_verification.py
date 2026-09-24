@@ -28,7 +28,7 @@ from src.cert_engine import (
     DB_PATH
 )
 from src.baselining import UserBehaviorProfiler
-from src.gemini_detector import ThreatDetector
+from src.threat_detector import ThreatDetector
 from src.prioritizer import rank_incident_queue, INVESTIGATOR_CAPACITY
 
 def run_all_verifications():
