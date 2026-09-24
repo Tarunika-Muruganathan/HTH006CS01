@@ -24,6 +24,9 @@ cert_data/*.db
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
 
 # macOS files
 .DS_Store
