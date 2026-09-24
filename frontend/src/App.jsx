@@ -21,6 +21,8 @@ import RiskBadge from './components/RiskBadge'
 import StatusBadge from './components/StatusBadge'
 import RiskGauge from './components/RiskGauge'
 import VerificationModal from './components/VerificationModal'
+import DatasetUpload from './components/DatasetUpload'
+import RejectionPanel from './components/RejectionPanel'
 import DashboardView from './views/DashboardView'
 import UsersView from './views/UsersView'
 import { demoIncidents, getSimulationFallback, monitoredUsers } from './data'
@@ -187,6 +189,9 @@ export default function App() {
           </div>
         </motion.div>
 
+        {/* Dataset Upload */}
+        <DatasetUpload onLoad={(items) => setIncidents(items)} />
+
         {/* View Content */}
         <AnimatePresence mode="wait">
           {activeView === 'dashboard'
@@ -277,6 +282,8 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                <RejectionPanel incident={selectedIncident} />
 
                 {/* Primary anomaly evidence */}
                 <div className="rounded-2xl border border-slate-800/50 bg-slate-950/40 p-5">
