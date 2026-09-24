@@ -71,6 +71,7 @@ export default {
         'float': 'float 6s ease-in-out infinite',
         'scan': 'scan 3s linear infinite',
         'border-flow': 'borderFlow 3s linear infinite',
+        'scroll-reveal': 'scrollReveal 0.8s cubic-bezier(0.16,1,0.3,1) both',
       },
       keyframes: {
         slideUp: {
@@ -113,6 +114,10 @@ export default {
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
+        },
+        scrollReveal: {
+          from: { opacity: '0', transform: 'translateY(24px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
       },
       transitionTimingFunction: {
