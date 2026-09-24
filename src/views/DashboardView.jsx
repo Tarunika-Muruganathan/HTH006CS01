@@ -20,6 +20,7 @@ import MetricCard from '../components/MetricCard'
 import RiskBadge from '../components/RiskBadge'
 import StatusBadge from '../components/StatusBadge'
 import RiskGauge from '../components/RiskGauge'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from 'recharts'
 
 const filters = ['ALL', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
@@ -268,6 +269,76 @@ export default function DashboardView({ incidents, onInvestigate }) {
                 <ChevronRight className="h-4 w-4 shrink-0 text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-400" />
               </motion.button>
             ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ─── Data Charts ─── */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
+          className="rounded-2xl border border-slate-800/60 glass p-5 shadow-glass"
+        >
+          <h4 className="text-sm font-bold text-white">Risk distribution by level</h4>
+          <p className="text-[11px] text-slate-500">Count of monitored identities</p>
+          <div className="mt-4 h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[
+                { name: 'LOW', value: metrics.LOW },
+                { name: 'MEDIUM', value: metrics.MEDIUM },
+                { name: 'HIGH', value: metrics.HIGH },
+                { name: 'CRITICAL', value: metrics.CRITICAL },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={{ stroke: '#334155' }} />
+                <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={{ stroke: '#334155' }} />
+                <Tooltip
+                  contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, color: '#f1f5f9', fontSize: 12 }}
+                  cursor={{ fill: 'rgba(14,165,233,0.08)' }}
+                />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                  {['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].map((level, i) => (
+                    <Cell key={level} fill={['#38bdf8', '#fbbf24', '#f97316', '#f43f5e'][i]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65, duration: 0.5 }}
+          className="rounded-2xl border border-slate-800/60 glass p-5 shadow-glass"
+        >
+          <h4 className="text-sm font-bold text-white">Level proportions</h4>
+          <p className="text-[11px] text-slate-500">Share of active alerts</p>
+          <div className="mt-4 h-56 flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'LOW', value: metrics.LOW },
+                    { name: 'MEDIUM', value: metrics.MEDIUM },
+                    { name: 'HIGH', value: metrics.HIGH },
+                    { name: 'CRITICAL', value: metrics.CRITICAL },
+                  ]}
+                  cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].map((_, i) => (
+                    <Cell key={i} fill={['#38bdf8', '#fbbf24', '#f97316', '#f43f5e'][i]} stroke="#0a0f1a" strokeWidth={2} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, color: '#f1f5f9', fontSize: 12 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </motion.div>
       </div>

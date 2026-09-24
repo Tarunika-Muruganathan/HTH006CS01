@@ -154,6 +154,7 @@ export default function App() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.1 }}
           className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800/50 glass px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 shadow-depth"
         >
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
