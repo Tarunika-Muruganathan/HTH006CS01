@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Activity,
   AlertTriangle,
@@ -8,14 +9,17 @@ import {
   Fingerprint,
   MapPin,
   RefreshCw,
+  Shield,
   ShieldCheck,
   ShieldX,
+  Sparkles,
   X,
 } from 'lucide-react'
 import api from './api'
 import Navbar from './components/Navbar'
 import RiskBadge from './components/RiskBadge'
 import StatusBadge from './components/StatusBadge'
+import RiskGauge from './components/RiskGauge'
 import VerificationModal from './components/VerificationModal'
 import DashboardView from './views/DashboardView'
 import UsersView from './views/UsersView'
@@ -64,7 +68,7 @@ export default function App() {
 
   const showNotice = useCallback((message, tone = 'info') => {
     setNotice({ message, tone })
-    window.setTimeout(() => setNotice(null), 3000)
+    window.setTimeout(() => setNotice(null), 3500)
   }, [])
 
   const pollAlerts = useCallback(async () => {
@@ -137,7 +141,7 @@ export default function App() {
   const SelectedIcon = selectedIncident ? (levelIcon[selectedIncident.level] ?? Activity) : Activity
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-gray-950 text-slate-100 noise-overlay">
       <Navbar
         activeView={activeView}
         onNavigate={setActiveView}
@@ -145,26 +149,52 @@ export default function App() {
         simulatingType={simulatingType}
       />
 
-      <main className="mx-auto max-w-[1680px] px-4 py-5 lg:px-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/45 px-3.5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-600">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <main className="mx-auto max-w-[1720px] px-4 py-6 lg:px-6">
+        {/* Status Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800/50 glass px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 shadow-depth"
+        >
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <span className="inline-flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-emerald-400' : backendOnline === false ? 'bg-amber-400' : 'bg-slate-600'}`} />
-              API {backendOnline ? 'Connected' : backendOnline === false ? 'Demo fallback' : 'Checking'}
+              <span className={`
+                relative flex h-2.5 w-2.5
+                ${backendOnline ? '' : ''}
+              `}>
+                {backendOnline && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+                )}
+                <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${backendOnline ? 'bg-emerald-400' : backendOnline === false ? 'bg-amber-400' : 'bg-slate-600'}`} />
+              </span>
+              <span className={backendOnline ? 'text-emerald-300/80' : backendOnline === false ? 'text-amber-300/80' : 'text-slate-600'}>
+                API {backendOnline ? 'Connected' : backendOnline === false ? 'Demo fallback' : 'Checking'}
+              </span>
             </span>
-            <span className="inline-flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Rule engine active</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Enforcement armed</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Activity className="h-3.5 w-3.5 text-cyan-400/50" />
+              Rule engine active
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400/50" />
+              Enforcement armed
+            </span>
           </div>
-          <div className="flex items-center gap-2 font-mono normal-case tracking-normal">
-            <RefreshCw className="h-3 w-3" /> Poll 5s · last sync {syncLabel}
+          <div className="flex items-center gap-2 font-mono normal-case tracking-normal text-slate-600">
+            <RefreshCw className="h-3 w-3 animate-spin" style={{ animationDuration: '4s' }} />
+            Poll 5s · last sync {syncLabel}
           </div>
-        </div>
+        </motion.div>
 
-        {activeView === 'dashboard'
-          ? <DashboardView incidents={incidents} onInvestigate={setSelectedIncident} />
-          : <UsersView users={users} />}
+        {/* View Content */}
+        <AnimatePresence mode="wait">
+          {activeView === 'dashboard'
+            ? <DashboardView key="dashboard" incidents={incidents} onInvestigate={setSelectedIncident} />
+            : <UsersView key="users" users={users} />}
+        </AnimatePresence>
       </main>
 
+      {/* ─── Verification Modal ─── */}
       <VerificationModal
         open={Boolean(verificationIncident)}
         incident={verificationIncident}
@@ -172,102 +202,164 @@ export default function App() {
         onVerified={handleVerified}
       />
 
-      {selectedIncident && (
-        <div className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm" onClick={() => setSelectedIncident(null)}>
-          <aside
-            className="soc-scrollbar absolute right-0 top-0 h-full w-full max-w-xl overflow-y-auto border-l border-slate-800 bg-slate-900 shadow-2xl shadow-black/60"
-            onClick={(event) => event.stopPropagation()}
+      {/* ─── Investigation Drawer ─── */}
+      <AnimatePresence>
+        {selectedIncident && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(3, 7, 18, 0.7)', backdropFilter: 'blur(8px)' }}
+              onClick={() => setSelectedIncident(null)}
+            />
+            <motion.aside
+              initial={{ x: '100%', opacity: 0.5 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="soc-scrollbar fixed right-0 top-0 z-40 h-full w-full max-w-xl overflow-y-auto border-l border-slate-800/60 shadow-glass-lg"
+              style={{
+                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.97) 0%, rgba(15, 23, 42, 0.95) 100%)',
+                backdropFilter: 'blur(24px)',
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 z-10 border-b border-slate-800/50 p-6" style={{ background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(24px)' }}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex gap-4">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-slate-700/50 bg-slate-950/60 text-slate-300">
+                      <SelectedIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">
+                        Explainable investigation
+                      </p>
+                      <h2 className="mt-1.5 text-xl font-bold text-white">{selectedIncident.name}</h2>
+                      <p className="mt-1 font-mono text-[10px] font-semibold text-slate-500">
+                        {selectedIncident.user_id} · {selectedIncident.department}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIncident(null)}
+                    className="rounded-xl border border-transparent p-2 text-slate-600 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/60 hover:text-slate-300"
+                    aria-label="Close investigation drawer"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="space-y-5 p-6">
+                {/* Risk gauge + stats */}
+                <div className="flex items-center gap-6">
+                  <RiskGauge value={selectedIncident.risk_score} size={100} label="Risk" />
+                  <div className="grid flex-1 grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-600">Level</p>
+                      <div className="mt-2"><RiskBadge level={selectedIncident.level} /></div>
+                    </div>
+                    <div className="rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-600">Status</p>
+                      <div className="mt-2"><StatusBadge status={selectedIncident.status} /></div>
+                    </div>
+                    <div className="col-span-2 rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-600">Seen</p>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                        <Clock3 className="h-3.5 w-3.5" /> {selectedIncident.last_seen}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Primary anomaly evidence */}
+                <div className="rounded-2xl border border-slate-800/50 bg-slate-950/40 p-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="grid h-7 w-7 place-items-center rounded-lg border border-amber-500/20 bg-amber-500/10">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-300" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Primary anomaly evidence</p>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-slate-300">{selectedIncident.primary_reason}</p>
+                </div>
+
+                {/* Context */}
+                <div className="rounded-2xl border border-slate-800/50 bg-slate-950/40 p-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Context</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="flex items-center gap-3.5 rounded-xl border border-slate-800/40 bg-slate-900/40 p-3.5">
+                      <div className="grid h-8 w-8 place-items-center rounded-lg border border-cyan-500/20 bg-cyan-500/10">
+                        <MapPin className="h-4 w-4 text-cyan-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.13em] text-slate-600">Location</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-300">{selectedIncident.location}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3.5 rounded-xl border border-slate-800/40 bg-slate-900/40 p-3.5">
+                      <div className="grid h-8 w-8 place-items-center rounded-lg border border-violet-500/20 bg-violet-500/10">
+                        <Fingerprint className="h-4 w-4 text-violet-300" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.13em] text-slate-600">Behavior model</p>
+                        <p className="mt-1 text-xs font-semibold text-slate-300">Baseline deviation detected</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Policy decision */}
+                <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.03] p-5">
+                  <div className="flex items-center gap-2.5 text-cyan-300">
+                    <div className="grid h-7 w-7 place-items-center rounded-lg border border-cyan-500/20 bg-cyan-500/10">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em]">Automated policy decision</p>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-slate-300">
+                    {actionCopy[selectedIncident.status] || 'Incident queued for analyst review.'}
+                  </p>
+                  <div className="mt-5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-300 transition-all duration-300 hover:gap-2.5 cursor-pointer">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Explainability evidence ready
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Toast Notification ─── */}
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="fixed bottom-6 right-6 z-[60] max-w-sm rounded-xl border border-slate-700/50 shadow-glass-lg"
+            style={{
+              background: 'rgba(15, 23, 42, 0.92)',
+              backdropFilter: 'blur(16px)',
+            }}
           >
-            <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur-xl">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex gap-3">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-700 bg-slate-950 text-slate-300">
-                    <SelectedIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-cyan-300">Explainable investigation</p>
-                    <h2 className="mt-1 text-xl font-bold text-slate-100">{selectedIncident.name}</h2>
-                    <p className="mt-1 font-mono text-[10px] font-semibold text-slate-500">{selectedIncident.user_id} · {selectedIncident.department}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedIncident(null)}
-                  className="rounded-lg border border-transparent p-1.5 text-slate-600 transition hover:border-slate-800 hover:bg-slate-950 hover:text-slate-300"
-                  aria-label="Close investigation drawer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+            <div className="flex items-center gap-3 px-5 py-4">
+              {String(notice.tone).toUpperCase() === 'LOW'
+                ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />
+                : <Activity className="h-4 w-4 shrink-0 text-cyan-300" />}
+              <p className="text-xs font-semibold text-slate-300">{notice.message}</p>
             </div>
-
-            <div className="space-y-4 p-5">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate-600">Risk</p>
-                  <p className="mt-1 font-mono text-2xl font-black text-slate-100">{selectedIncident.risk_score}</p>
-                </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate-600">Level</p>
-                  <div className="mt-2"><RiskBadge level={selectedIncident.level} /></div>
-                </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate-600">Status</p>
-                  <div className="mt-2"><StatusBadge status={selectedIncident.status} /></div>
-                </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate-600">Seen</p>
-                  <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-slate-400"><Clock3 className="h-3 w-3" /> {selectedIncident.last_seen}</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Primary anomaly evidence</p>
-                <div className="mt-3 flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
-                  <p className="text-sm leading-6 text-slate-300">{selectedIncident.primary_reason}</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Context</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
-                    <MapPin className="h-4 w-4 text-cyan-300" />
-                    <div><p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">Location</p><p className="mt-1 text-xs font-semibold text-slate-300">{selectedIncident.location}</p></div>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
-                    <Fingerprint className="h-4 w-4 text-cyan-300" />
-                    <div><p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">Behavior model</p><p className="mt-1 text-xs font-semibold text-slate-300">Baseline deviation detected</p></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] p-4">
-                <div className="flex items-center gap-2 text-cyan-300">
-                  <ShieldCheck className="h-4 w-4" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em]">Automated policy decision</p>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{actionCopy[selectedIncident.status] || 'Incident queued for analyst review.'}</p>
-                <div className="mt-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.11em] text-cyan-300">
-                  Explainability evidence ready <ChevronRight className="h-3.5 w-3.5" />
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
-      )}
-
-      {notice && (
-        <div className="fixed bottom-5 right-5 z-[60] max-w-sm animate-slide-up rounded-xl border border-slate-700 bg-slate-900/95 px-4 py-3 shadow-2xl shadow-black/50 backdrop-blur-xl">
-          <div className="flex items-center gap-3">
-            {String(notice.tone).toUpperCase() === 'LOW'
-              ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-300" />
-              : <Activity className="h-4 w-4 shrink-0 text-cyan-300" />}
-            <p className="text-xs font-semibold text-slate-300">{notice.message}</p>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
