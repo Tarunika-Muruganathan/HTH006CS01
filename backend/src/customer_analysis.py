@@ -4,8 +4,13 @@ import csv
 import io
 from collections import Counter
 from typing import Any, Dict, List
-from google import genai
-from google.genai import types
+
+try:
+    from google import genai
+    from google.genai import types
+    _HAS_GENAI = True
+except ImportError:
+    _HAS_GENAI = False
 
 
 def _tier(score: int) -> tuple[str, str]:
@@ -37,32 +42,76 @@ def _field(row: Dict[str, Any], *names: str, default: str = "") -> Any:
 
 
 def _risk_for_row(row: Dict[str, Any]) -> tuple[int, List[str]]:
-    """Deterministic local score; AI enriches the summary but never executes dataset text."""
-    supplied = _field(row, "risk_score", "score", "risk")
+    """Deterministic local score; evaluates location, apps, and files accessed."""
+    points, reasons = 0, []
+    row_str = " ".join(f"{k} {v}" for k, v in row.items()).lower()
+    
+    # 1. Direct Risk Score Override (if provided)
+    supplied = _field(row, "risk_score", "score", "risk", "severity", "level")
     if supplied not in (None, ""):
+        val = str(supplied).strip().upper()
+        if val in ["CRITICAL", "HIGH"]: return 95, ["High severity level found in dataset"]
+        if val == "MEDIUM": return 65, ["Medium severity level found in dataset"]
+        if val == "LOW": return 15, ["Low severity level found in dataset"]
         try:
             return max(0, min(100, int(float(supplied)))), ["Risk score supplied by the uploaded dataset"]
         except (TypeError, ValueError):
             pass
 
-    points, reasons = 0, []
-    hour = _field(row, "hour", "login_hour", "event_hour")
+    # Extract specific context fields
+    location = str(_field(row, "location", "country", "city", "ip_location", "region")).lower()
+    app = str(_field(row, "app", "application", "service", "process", "software")).lower()
+    file_acc = str(_field(row, "file", "filename", "resource", "data", "object", "accessed_files")).lower()
+
+    # 2. Location-Based Logic
+    risky_locations = ["russia", "china", "north korea", "iran", "unknown", "tor", "vpn", "proxy", "darkweb"]
+    if any(loc in location for loc in risky_locations):
+        points += 35
+        reasons.append(f"Suspicious login location detected ({location.title()})")
+    elif "impossible travel" in row_str or "unusual location" in row_str or "new location" in row_str:
+        points += 40
+        reasons.append("Impossible travel or unusual login location detected")
+
+    # 3. Application Usage Logic
+    sensitive_apps = ["vault", "admin", "root", "aws console", "azure", "powershell", "cmd", "terminal", "shadow it", "psexec"]
+    if any(a in app for a in sensitive_apps):
+        points += 30
+        reasons.append(f"Access to sensitive or high-risk application ({app})")
+    if "misconfig" in app or "bypass" in app or "exploit" in app:
+        points += 45
+        reasons.append(f"Exploitation of misconfigured app or security bypass")
+
+    # 4. File / Resource Access Logic
+    sensitive_files = ["confidential", "secret", "password", "customer", "financial", "pii", "ssn", "credit", "keys", ".pem"]
+    if any(f in file_acc for f in sensitive_files):
+        points += 35
+        reasons.append(f"Interaction with highly sensitive files ({file_acc})")
+    
+    file_count = _field(row, "file_count", "download_count", "volume", "count")
     try:
-        if int(float(hour)) < 6 or int(float(hour)) > 20:
-            points += 20; reasons.append("Activity occurred outside normal working hours")
+        if int(float(file_count)) > 50:
+            points += 40
+            reasons.append("Mass file download or data exfiltration volume detected")
     except (TypeError, ValueError):
         pass
-    if str(_field(row, "new_device", "unknown_device", default="")).lower() in {"1", "true", "yes"}:
-        points += 25; reasons.append("New or unrecognised device")
-    if str(_field(row, "external_upload", "file_upload", "usb_transfer", default="")).lower() in {"1", "true", "yes"}:
-        points += 35; reasons.append("External file transfer or upload observed")
-    failed = _field(row, "failed_logins", "login_failures", default=0)
-    try:
-        if int(float(failed)) >= 3:
-            points += 25; reasons.append("Repeated failed authentication attempts")
-    except (TypeError, ValueError):
-        pass
-    return min(100, points), reasons or ["No high-confidence anomaly signal was detected in the uploaded fields"]
+
+    # 5. Generic Action / Behavior Fallback
+    if any(w in row_str for w in ["fail", "error", "unauthorized", "denied", "reject", "block"]):
+        if not any("unauthorized" in r for r in reasons):
+            points += 25; reasons.append("Failed, unauthorized, or blocked action detected")
+            
+    if any(w in row_str for w in ["upload", "usb", "exfil", "transfer", "mass download"]):
+        if not any("download" in r for r in reasons):
+            points += 30; reasons.append("Data transfer, external upload, or bulk operation observed")
+            
+    if any(w in row_str for w in ["malicious", "attack", "exploit", "cve", "misconfigured", "breach", "threat", "anomaly"]):
+        if not any("misconfig" in r for r in reasons):
+            points += 50; reasons.append("Suspicious, misconfigured, or malicious signature detected")
+
+    if points > 0:
+        return min(100, points), reasons
+        
+    return 0, ["No high-confidence anomaly signal was detected in the uploaded fields"]
 
 
 def analyze_uploaded_dataset(dataset_content: str, filename: str = "") -> Dict[str, Any]:
@@ -97,15 +146,19 @@ def analyze_uploaded_dataset(dataset_content: str, filename: str = "") -> Dict[s
             "records_analyzed": len(incidents),
             "distribution": dict(distribution),
             "high_risk_records": distribution["HIGH"] + distribution["CRITICAL"],
-            "analysis_mode": "deterministic risk scoring with optional Gemini summary",
+            "analysis_mode": "deterministic risk scoring",
         },
     }
 
+
 def analyze_customer_dataset(dataset_content: str, api_key: str = None) -> str:
     """
-    Analyzes a customer dataset with strict guardrails to only respond to the logs
-    and ignore any other data.
+    Analyzes a customer dataset using the Gemini AI API.
+    Only called when GEMINI_API_KEY is set and google-genai is installed.
     """
+    if not _HAS_GENAI:
+        raise RuntimeError("google-genai package is not installed. Install with: pip install google-genai")
+
     key = api_key or os.environ.get("GEMINI_API_KEY")
     client = genai.Client(api_key=key)
 

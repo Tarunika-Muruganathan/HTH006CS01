@@ -23,9 +23,10 @@ import RiskGauge from './components/RiskGauge'
 import VerificationModal from './components/VerificationModal'
 import DatasetUpload from './components/DatasetUpload'
 import RejectionPanel from './components/RejectionPanel'
+import AIAssistant from './components/AIAssistant'
 import DashboardView from './views/DashboardView'
 import UsersView from './views/UsersView'
-import { demoIncidents, getSimulationFallback, monitoredUsers } from './data'
+import { demoIncidents, monitoredUsers } from './data'
 
 const normalizeIncident = (incident = {}) => ({
   user_id: incident.user_id ?? incident.userId ?? incident.employee_id ?? 'UNKNOWN',
@@ -38,11 +39,6 @@ const normalizeIncident = (incident = {}) => ({
   status: String(incident.status ?? 'APPROVED').toUpperCase(),
   last_seen: incident.last_seen ?? incident.timestamp ?? 'just now',
 })
-
-const upsertIncident = (items, incoming) => {
-  const normalized = normalizeIncident(incoming)
-  return [normalized, ...items.filter((item) => item.user_id !== normalized.user_id)]
-}
 
 const actionCopy = {
   APPROVED: 'Access allowed. Activity remains under passive monitoring.',
@@ -63,22 +59,20 @@ export default function App() {
   const [incidents, setIncidents] = useState(demoIncidents)
   const [verificationIncident, setVerificationIncident] = useState(null)
   const [selectedIncident, setSelectedIncident] = useState(null)
-  const [simulatingType, setSimulatingType] = useState('')
   const [backendOnline, setBackendOnline] = useState(null)
   const [lastSync, setLastSync] = useState(null)
   const [notice, setNotice] = useState(null)
   const [datasetSummary, setDatasetSummary] = useState(null)
+  const [evidenceExpanded, setEvidenceExpanded] = useState(false)
 
   const showNotice = useCallback((message, tone = 'info') => {
     setNotice({ message, tone })
     window.setTimeout(() => setNotice(null), 3500)
   }, [])
 
-  const pollAlerts = useCallback(async () => {
+  const checkHealth = useCallback(async () => {
     try {
-      const { data } = await api.get('/alerts')
-      const payload = Array.isArray(data) ? data : data?.alerts ?? data?.incidents ?? data?.results ?? []
-      if (Array.isArray(payload) && payload.length) setIncidents(payload.map(normalizeIncident))
+      await api.get('/health')
       setBackendOnline(true)
       setLastSync(new Date())
     } catch {
@@ -87,39 +81,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    pollAlerts()
-    const timer = window.setInterval(pollAlerts, 5000)
+    checkHealth()
+    const timer = window.setInterval(checkHealth, 5000)
     return () => window.clearInterval(timer)
-  }, [pollAlerts])
-
-  useEffect(() => {
-    const verifying = incidents.find((incident) => incident.status === 'VERIFYING')
-    if (verifying && verifying.user_id === 'EMP205') {
-      setVerificationIncident((current) => current ?? verifying)
-    }
-  }, [incidents])
-
-  const handleSimulation = async (type) => {
-    setSimulatingType(type)
-    try {
-      const { data } = await api.post(`/simulation/inject/${type}`)
-      const candidate = data?.incident ?? data?.alert ?? data
-      const normalized = normalizeIncident(candidate)
-      setIncidents((current) => upsertIncident(current, normalized))
-      setBackendOnline(true)
-      setLastSync(new Date())
-      showNotice(`${normalized.user_id}: ${normalized.status} · risk ${normalized.risk_score}/100`, normalized.level)
-      if (type === 'medium' || normalized.status === 'VERIFYING') setVerificationIncident(normalized)
-    } catch {
-      const fallback = getSimulationFallback(type)
-      setIncidents((current) => upsertIncident(current, fallback))
-      if (type === 'medium') setVerificationIncident(fallback)
-      setBackendOnline(false)
-      showNotice(`${fallback.user_id}: demo event injected · ${fallback.status}`, fallback.level)
-    } finally {
-      setSimulatingType('')
-    }
-  }
+  }, [checkHealth])
 
   const handleVerified = (verifiedIncident) => {
     setIncidents((current) =>
@@ -148,8 +113,6 @@ export default function App() {
       <Navbar
         activeView={activeView}
         onNavigate={setActiveView}
-        onSimulation={handleSimulation}
-        simulatingType={simulatingType}
       />
 
       <main className="mx-auto max-w-[1720px] px-4 py-6 lg:px-6">
@@ -164,7 +127,6 @@ export default function App() {
             <span className="inline-flex items-center gap-2">
               <span className={`
                 relative flex h-2.5 w-2.5
-                ${backendOnline ? '' : ''}
               `}>
                 {backendOnline && (
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
@@ -172,7 +134,7 @@ export default function App() {
                 <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${backendOnline ? 'bg-emerald-400' : backendOnline === false ? 'bg-amber-400' : 'bg-slate-600'}`} />
               </span>
               <span className={backendOnline ? 'text-emerald-300/80' : backendOnline === false ? 'text-amber-300/80' : 'text-slate-600'}>
-                API {backendOnline ? 'Connected' : backendOnline === false ? 'Demo fallback' : 'Checking'}
+                API {backendOnline ? 'Connected' : backendOnline === false ? 'Offline' : 'Checking'}
               </span>
             </span>
             <span className="inline-flex items-center gap-1.5">
@@ -190,7 +152,7 @@ export default function App() {
           </div>
         </motion.div>
 
-        {/* Optional customer dataset analysis — the regular CERT dashboard remains the default. */}
+        {/* Dataset upload section */}
         <DatasetUpload onLoad={(items, summary) => {
           setIncidents(items)
           setDatasetSummary(summary ?? null)
@@ -202,8 +164,11 @@ export default function App() {
           <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-cyan-500/15 bg-cyan-500/[0.05] px-4 py-3 text-xs text-cyan-100">
             <span className="font-semibold">Uploaded dataset active</span>
             <span>{datasetSummary.records_analyzed} records analysed</span>
+            {datasetSummary.files_processed && (
+              <span>{datasetSummary.files_processed} files processed</span>
+            )}
             <span>{datasetSummary.high_risk_records} high-priority records</span>
-            <button type="button" className="ml-auto font-semibold text-cyan-300 underline underline-offset-4 hover:text-white" onClick={() => { setDatasetSummary(null); setIncidents(demoIncidents); setSelectedIncident(null) }}>Return to CERT dashboard</button>
+            <button type="button" className="ml-auto font-semibold text-cyan-300 underline underline-offset-4 hover:text-white" onClick={() => { setDatasetSummary(null); setIncidents(demoIncidents); setSelectedIncident(null) }}>Clear dataset</button>
           </div>
         )}
 
@@ -223,6 +188,9 @@ export default function App() {
         onVerified={handleVerified}
       />
 
+      {/* ─── AI Assistant ─── */}
+      <AIAssistant incident={selectedIncident} />
+
       {/* ─── Investigation Drawer ─── */}
       <AnimatePresence>
         {selectedIncident && (
@@ -233,7 +201,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-40"
               style={{ background: 'rgba(3, 7, 18, 0.7)', backdropFilter: 'blur(8px)' }}
-              onClick={() => setSelectedIncident(null)}
+              onClick={() => { setSelectedIncident(null); setEvidenceExpanded(false) }}
             />
             <motion.aside
               initial={{ x: '100%', opacity: 0.5 }}
@@ -256,7 +224,7 @@ export default function App() {
                     </div>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-300">
-                        Explainable investigation
+                        Investigation
                       </p>
                       <h2 className="mt-1.5 text-xl font-bold text-white">{selectedIncident.name}</h2>
                       <p className="mt-1 font-mono text-[10px] font-semibold text-slate-500">
@@ -266,7 +234,7 @@ export default function App() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedIncident(null)}
+                    onClick={() => { setSelectedIncident(null); setEvidenceExpanded(false) }}
                     className="rounded-xl border border-transparent p-2 text-slate-600 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/60 hover:text-slate-300"
                     aria-label="Close investigation drawer"
                   >
@@ -347,11 +315,70 @@ export default function App() {
                   <p className="mt-4 text-sm leading-7 text-slate-300">
                     {actionCopy[selectedIncident.status] || 'Incident queued for analyst review.'}
                   </p>
-                  <div className="mt-5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-300 transition-all duration-300 hover:gap-2.5 cursor-pointer">
+
+                  {/* Explainability Evidence — now functional */}
+                  <button
+                    type="button"
+                    onClick={() => setEvidenceExpanded((prev) => !prev)}
+                    className="mt-5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-300 transition-all duration-300 hover:gap-2.5 cursor-pointer hover:text-cyan-200"
+                  >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Explainability evidence ready
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </div>
+                    {evidenceExpanded ? 'Hide explainability evidence' : 'Show explainability evidence'}
+                    <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-300 ${evidenceExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {evidenceExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 space-y-3 rounded-xl border border-slate-800/40 bg-slate-950/40 p-4">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-cyan-400" />
+                            <p className="text-xs font-bold text-white">Explainability Breakdown</p>
+                          </div>
+
+                          <div className="space-y-2.5 text-xs text-slate-400">
+                            <div className="rounded-lg border border-slate-800/30 bg-slate-900/30 p-3">
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Risk factor analysis</p>
+                              <p className="leading-relaxed">{selectedIncident.primary_reason}</p>
+                            </div>
+
+                            <div className="rounded-lg border border-slate-800/30 bg-slate-900/30 p-3">
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Scoring methodology</p>
+                              <p className="leading-relaxed">
+                                Risk score <strong className="text-white">{selectedIncident.risk_score}/100</strong> computed
+                                via deterministic behavioral baselining. Score reflects deviation magnitude from the
+                                user's historical activity pattern, weighted by resource sensitivity and temporal anomaly factors.
+                              </p>
+                            </div>
+
+                            <div className="rounded-lg border border-slate-800/30 bg-slate-900/30 p-3">
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Policy enforcement</p>
+                              <p className="leading-relaxed">
+                                Level <strong className="text-white">{selectedIncident.level}</strong> → Action: <strong className="text-white">{selectedIncident.status}</strong>.{' '}
+                                {actionCopy[selectedIncident.status] || 'Pending review.'}
+                              </p>
+                            </div>
+
+                            <div className="rounded-lg border border-slate-800/30 bg-slate-900/30 p-3">
+                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Identity context</p>
+                              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                <div><span className="text-slate-500">Department:</span> <span className="text-slate-300">{selectedIncident.department}</span></div>
+                                <div><span className="text-slate-500">Location:</span> <span className="text-slate-300">{selectedIncident.location}</span></div>
+                                <div><span className="text-slate-500">Last seen:</span> <span className="text-slate-300">{selectedIncident.last_seen}</span></div>
+                                <div><span className="text-slate-500">User ID:</span> <span className="text-cyan-400 font-mono">{selectedIncident.user_id}</span></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </motion.aside>
@@ -367,7 +394,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="fixed bottom-6 right-6 z-[60] max-w-sm rounded-xl border border-slate-700/50 shadow-glass-lg"
+            className="fixed bottom-6 left-6 z-[60] max-w-sm rounded-xl border border-slate-700/50 shadow-glass-lg"
             style={{
               background: 'rgba(15, 23, 42, 0.92)',
               backdropFilter: 'blur(16px)',

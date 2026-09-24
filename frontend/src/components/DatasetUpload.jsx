@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { AlertCircle, CheckCircle2, FileUp, Sparkles, UploadCloud } from 'lucide-react'
+import { AlertCircle, Archive, CheckCircle2, FileUp, Sparkles, UploadCloud } from 'lucide-react'
 import api from '../api'
 
 export default function DatasetUpload({ onLoad }) {
@@ -11,22 +11,32 @@ export default function DatasetUpload({ onLoad }) {
     const file = event.target.files?.[0]
     if (!file) return
     setStatus('analyzing')
-    setMessage('Reading your dataset and calculating explainable risk scores…')
+
+    const isZip = file.name.toLowerCase().endsWith('.zip')
+    setMessage(
+      isZip
+        ? 'Extracting ZIP archive and analysing all log files…'
+        : 'Reading your dataset and calculating risk scores…'
+    )
+
     try {
       const payload = new FormData()
       payload.append('file', file)
       const { data } = await api.post('/dataset/analyze', payload, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 60000,
+        timeout: 120000,
       })
       const incidents = data?.incidents ?? []
       if (!incidents.length) throw new Error('No valid records found in this file.')
       onLoad?.(incidents, data?.summary, data?.ai_summary)
       setStatus('done')
-      setMessage(`${data.summary?.records_analyzed ?? incidents.length} records analysed · ${data.summary?.high_risk_records ?? 0} need review`)
+      const filesInfo = data.summary?.files_processed
+        ? ` across ${data.summary.files_processed} files`
+        : ''
+      setMessage(`${data.summary?.records_analyzed ?? incidents.length} records analysed${filesInfo} · ${data.summary?.high_risk_records ?? 0} need review`)
     } catch (error) {
       setStatus('error')
-      setMessage(error.response?.data?.detail ?? error.message ?? 'Analysis failed. Use a CSV or JSON export with a header row.')
+      setMessage(error.response?.data?.detail ?? error.message ?? 'Analysis failed. Upload a CSV, JSON, or ZIP file.')
     } finally {
       event.target.value = ''
     }
@@ -40,12 +50,14 @@ export default function DatasetUpload({ onLoad }) {
             <UploadCloud className="h-5 w-5 text-cyan-300" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white">Analyse your organisation’s event data</h2>
-            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">Optional. Upload a CSV or JSON export when you need an isolated risk assessment. The regular SOC dashboard stays on the built-in CERT dataset until you submit a file.</p>
+            <h2 className="text-sm font-bold text-white">Upload Log Dataset</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
+              Upload a single log file (CSV, JSON, TXT) or a <strong className="text-cyan-300/80">ZIP archive</strong> containing multiple log files for unified analysis.
+            </p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <input ref={inputRef} type="file" accept=".csv,.json,.txt,text/csv,application/json" className="hidden" onChange={handleFile} />
+          <input ref={inputRef} type="file" accept=".csv,.json,.txt,.log,.zip,text/csv,application/json,application/zip" className="hidden" onChange={handleFile} />
           <button type="button" onClick={() => inputRef.current?.click()} disabled={status === 'analyzing'} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-950/30 transition hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 disabled:cursor-wait disabled:opacity-60">
             {status === 'analyzing' ? <Sparkles className="h-3.5 w-3.5 animate-pulse" /> : <FileUp className="h-3.5 w-3.5" />}
             {status === 'analyzing' ? 'Analysing…' : 'Upload dataset'}

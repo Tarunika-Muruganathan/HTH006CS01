@@ -97,7 +97,7 @@ export default function UsersView({ users }) {
             Monitored Identity Directory
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            Behavioral baseline, latest risk posture, location, and enforcement state for all 35 identities.
+            Behavioral baseline, risk posture, and enforcement state for all monitored identities.
           </p>
         </div>
 

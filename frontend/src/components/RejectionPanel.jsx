@@ -39,7 +39,7 @@ export default function RejectionPanel({ incident }) {
         <p className="mt-2 text-sm leading-relaxed text-slate-300">{reason}</p>
       </div>
 
-      <div className="mt-3 text-[11px] text-slate-500">Based on backend behavioral baselining (USER_LOGS → GEMINI detector → PRIORITIZER). Score derived from anomaly deviation from learned profile.</div>
+      <div className="mt-3 text-[11px] text-slate-500">Score derived from behavioral baselining and anomaly deviation from the learned user profile.</div>
     </div>
   )
 }
