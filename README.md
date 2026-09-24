@@ -1,52 +1,36 @@
-# Explainable Insider-Threat Behavioral Anomaly Detector (HTH-CS-07)
+# VectrGuard — Insider-Threat Anomaly Detection Platform
 
-Enterprise insider threat detection platform featuring a Python/Streamlit analytics backend and a modern React/Vite SOC dashboard.
+An explainable UEBA (User & Entity Behavior Analytics) dashboard for SOC operations.  
+Upload log datasets (single files or ZIP archives with multiple logs), get deterministic risk scores, and investigate anomalies with an AI-powered assistant.
 
----
+## Quick Start
 
-## 📁 Repository Structure
-
-```
-HTH006CS01/
-├── frontend/             # React 18 + Vite + Tailwind CSS SOC Dashboard
-│   ├── src/              # React components, views, and styles
-│   ├── package.json      # Node.js dependencies
-│   ├── vite.config.js    # Vite configuration
-│   └── README.md         # Frontend specific setup & demo guide
-│
-├── backend/              # Python / Streamlit UEBA & Detection Engine
-│   ├── app.py            # Streamlit SOC dashboard & detection app
-│   ├── src/              # Core algorithms (baselining, cert_engine, threat_detector, prioritizer)
-│   ├── insider_threat_data/ # Enterprise dataset v2 (2,500 users, 180 days)
-│   ├── tests/            # Test suite
-│   ├── requirements.txt  # Python dependencies
-│   └── BACKEND_ANALYSIS.md # Backend architecture notes
-│
-└── README.md             # Project overview and run instructions
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+python server.py
 ```
 
----
-
-## 🚀 Getting Started
-
-### 1. Frontend Setup (React + Vite)
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Runs at `http://localhost:5173`.
 
-### 2. Backend Setup (Python + Streamlit)
-```bash
-cd backend
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On Linux/macOS:
-# source .venv/bin/activate
+## Features
 
-pip install -r requirements.txt
-streamlit run app.py
-```
-Runs at `http://localhost:8501`.
+- **Multi-file ZIP Upload** — Upload a ZIP archive containing multiple CSV/JSON/TXT log files for unified analysis
+- **Deterministic Risk Scoring** — Behavioral baselining with anomaly deviation scoring (0–100)
+- **Adaptive Access Policy** — Automatic enforcement: APPROVE / VERIFY (OTP) / FREEZE / BLOCK
+- **AI Investigation Assistant** — Contextual chat assistant for incident analysis and recommendations
+- **Explainability Evidence** — Full scoring methodology breakdown for every flagged identity
+- **Step-up Verification** — OTP-based identity verification for medium-risk sessions
+- **Live Dashboard** — Real-time risk distribution charts and incident queue
+
+## Tech Stack
+
+- **Frontend:** React + Vite + Tailwind CSS + Framer Motion + Recharts
+- **Backend:** Python FastAPI + Pandas
+- **AI:** Optional Gemini API integration for enhanced analysis
