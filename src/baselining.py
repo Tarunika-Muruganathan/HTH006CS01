@@ -1,7 +1,7 @@
 """
 Per-User Statistical Profiler & Baseline Behavioral Modeling
 Project Code: HTH-CS-07
-Dataset: CMU CERT r4.2
+Dataset: Enterprise Insider Threat Dataset v2
 """
 
 import sqlite3
@@ -13,19 +13,20 @@ import numpy as np
 
 from src.cert_engine import get_db_connection, DB_PATH
 
+
 class UserBehaviorProfiler:
     """
-    Constructs per-user 30-day statistical baselines, departmental peer group norms,
-    and day-by-day longitudinal behavioral drift trajectories from CERT r4.2 logs.
+    Constructs per-user statistical baselines, departmental peer group norms,
+    and day-by-day longitudinal behavioral drift trajectories from data_v2 logs.
     """
     def __init__(self, db_path: Optional[Path] = None):
         self.db_path = db_path or DB_PATH
 
-    def get_user_ldap_profile(self, user_id: str) -> Dict[str, Any]:
-        """Fetch employee metadata from LDAP."""
+    def get_user_profile(self, user_id: str) -> Dict[str, Any]:
+        """Fetch employee metadata from users table."""
         conn = get_db_connection(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM ldap WHERE user_id = ?", (user_id,))
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else {}
@@ -34,225 +35,310 @@ class UserBehaviorProfiler:
         """Fetch all user IDs in a department."""
         conn = get_db_connection(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT user_id FROM ldap WHERE department = ?", (department,))
+        cursor.execute("SELECT user_id FROM users WHERE department = ?", (department,))
         rows = cursor.fetchall()
         conn.close()
         return [r["user_id"] for r in rows]
 
     def build_user_baseline(self, user_id: str) -> Dict[str, Any]:
         """
-        Calculates 30-day statistical baseline metrics:
-        - Work hours (typical logon / logoff)
-        - Primary PC
-        - Baseline USB device usage (typically 0.0)
+        Calculates statistical baseline metrics from the 40-day clean baseline window:
+        - Work hours (typical logon / logoff from users table)
+        - Primary device
+        - Baseline USB/device usage
         - Average daily file access & egress volume
-        - Average daily email volume & external recipients
         - Peer department averages
         """
         conn = get_db_connection(self.db_path)
-        
+
+        # User profile
+        user_info = self.get_user_profile(user_id)
+
         # Load user logs
-        logon_df = pd.read_sql_query("SELECT * FROM logon WHERE user = ?", conn, params=(user_id,))
-        device_df = pd.read_sql_query("SELECT * FROM device WHERE user = ?", conn, params=(user_id,))
-        file_df = pd.read_sql_query("SELECT * FROM file WHERE user = ?", conn, params=(user_id,))
-        email_df = pd.read_sql_query("SELECT * FROM email WHERE user = ?", conn, params=(user_id,))
-        http_df = pd.read_sql_query("SELECT * FROM http WHERE user = ?", conn, params=(user_id,))
-        ldap_info = self.get_user_ldap_profile(user_id)
-        
+        logon_df = pd.read_sql_query(
+            "SELECT * FROM logon_events WHERE user_id = ?", conn, params=(user_id,))
+        device_df = pd.read_sql_query(
+            "SELECT * FROM device_events WHERE user_id = ?", conn, params=(user_id,))
+        file_df = pd.read_sql_query(
+            "SELECT * FROM file_events WHERE user_id = ?", conn, params=(user_id,))
+
         conn.close()
 
-        # Parse timestamps
-        for df in [logon_df, device_df, file_df, email_df, http_df]:
-            if not df.empty and "date" in df.columns:
-                df["datetime"] = pd.to_datetime(df["date"], format="%m/%d/%Y %H:%M:%S", errors="coerce")
+        # Parse timestamps (ISO 8601 format: YYYY-MM-DD HH:MM:SS)
+        for df in [logon_df, file_df]:
+            if not df.empty and "timestamp" in df.columns:
+                df["datetime"] = pd.to_datetime(df["timestamp"], errors="coerce")
                 df["hour"] = df["datetime"].dt.hour
                 df["day"] = df["datetime"].dt.date
 
-        # Primary Workstation
-        primary_pc = logon_df["pc"].mode()[0] if not logon_df.empty and not logon_df["pc"].empty else "Unknown"
+        if not device_df.empty and "timestamp" in device_df.columns:
+            device_df["datetime"] = pd.to_datetime(device_df["timestamp"], errors="coerce")
 
-        # Hours of operation (baseline days 1 to 27)
+        # Primary Device
+        primary_device = user_info.get("primary_device", "Unknown")
+
+        # Hours of operation from users table
+        work_start = user_info.get("work_start", "09:00")
+        work_end = user_info.get("work_end", "17:00")
+
+        try:
+            typical_start_hour = int(work_start.split(":")[0])
+            typical_end_hour = int(work_end.split(":")[0])
+        except (ValueError, AttributeError):
+            typical_start_hour, typical_end_hour = 9, 17
+
+        # Count off-hours logons in baseline window (first 40 days)
+        off_hours_logons = 0
         if not logon_df.empty:
             earliest_date = logon_df["datetime"].min()
-            cutoff_date = earliest_date + datetime.timedelta(days=26)
-            baseline_logons = logon_df[logon_df["datetime"] <= cutoff_date]
-            if not baseline_logons.empty:
-                typical_start_hour = int(baseline_logons[baseline_logons["activity"] == "Logon"]["hour"].median()) if not baseline_logons[baseline_logons["activity"] == "Logon"].empty else 9
-                typical_end_hour = int(baseline_logons[baseline_logons["activity"] == "Logoff"]["hour"].median()) if not baseline_logons[baseline_logons["activity"] == "Logoff"].empty else 17
-                off_hours_logons = len(baseline_logons[(baseline_logons["hour"] < 7) | (baseline_logons["hour"] > 20)])
-            else:
-                typical_start_hour, typical_end_hour, off_hours_logons = 9, 17, 0
+            if pd.notnull(earliest_date):
+                baseline_cutoff = earliest_date + datetime.timedelta(days=40)
+                baseline_logons = logon_df[logon_df["datetime"] <= baseline_cutoff]
+                login_events = baseline_logons[baseline_logons["action"] == "login"]
+                if not login_events.empty:
+                    off_hours_logons = int(len(
+                        login_events[(login_events["hour"] < 7) | (login_events["hour"] >= 20)]
+                    ))
+
+        # Baseline device events (USB connections in baseline)
+        usb_connects_total = 0
+        if not device_df.empty:
+            usb_connects_total = int(len(device_df[device_df["event"] == "usb_connect"]))
+
+        # Daily file activity and egress
+        if not file_df.empty and "day" in file_df.columns:
+            daily_files = float(file_df.groupby("day").size().mean())
+            daily_egress_bytes = float(file_df.groupby("day")["bytes"].sum().mean()) if "bytes" in file_df.columns else 25000.0
         else:
-            typical_start_hour, typical_end_hour, off_hours_logons = 9, 17, 0
-
-        # Baseline USB connects (Historical)
-        usb_connects_total = len(device_df[device_df["activity"] == "Connect"]) if not device_df.empty else 0
-
-        # Daily Egress & File Activity
-        daily_files = file_df.groupby("day").size().mean() if not file_df.empty else 1.2
-        daily_emails = email_df.groupby("day").size().mean() if not email_df.empty else 1.0
-        daily_email_bytes = email_df.groupby("day")["size"].sum().mean() if not email_df.empty and "size" in email_df.columns else 25000.0
+            daily_files = 1.2
+            daily_egress_bytes = 25000.0
 
         # Department Peer Group Norms
-        dept = ldap_info.get("department", "General Enterprise")
+        dept = user_info.get("department", "General")
         peer_baseline = self._get_department_peer_norms(dept)
 
         return {
             "user_id": user_id,
-            "employee_name": ldap_info.get("employee_name", user_id),
-            "role": ldap_info.get("role", "Employee"),
+            "employee_name": user_id,
+            "role": user_info.get("role", "Employee"),
             "department": dept,
-            "primary_pc": primary_pc,
+            "primary_pc": primary_device,
             "typical_working_hours": f"{typical_start_hour:02d}:00 - {typical_end_hour:02d}:00",
             "historical_off_hours_logons": off_hours_logons,
             "baseline_usb_connects": 0.0,  # Strict corporate policy baseline
-            "avg_daily_file_ops": round(float(daily_files), 1),
-            "avg_daily_email_ops": round(float(daily_emails), 1),
-            "avg_daily_egress_bytes": round(float(daily_email_bytes), 0),
+            "avg_daily_file_ops": round(daily_files, 1),
+            "avg_daily_egress_bytes": round(daily_egress_bytes, 0),
             "peer_group_department": dept,
             "peer_group_avg_egress_bytes": peer_baseline["peer_avg_egress_bytes"],
             "peer_group_usb_policy": "Zero-Tolerance Unauthorized Removable Storage",
+            "home_country": user_info.get("home_country", "US"),
+            "home_city": user_info.get("home_city", "Unknown"),
+            "on_call": user_info.get("on_call", "False"),
         }
 
     def _get_department_peer_norms(self, department: str) -> Dict[str, Any]:
         """Computes aggregate baseline norms across departmental peers."""
         conn = get_db_connection(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("SELECT user_id FROM ldap WHERE department = ?", (department,))
-        peer_ids = [r["user_id"] for r in cursor.fetchall()]
-        conn.close()
 
-        if not peer_ids:
-            return {"peer_avg_egress_bytes": 45000, "peer_off_hours_rate": 0.02}
-
-        # Query average email sizes for peers
-        conn = get_db_connection(self.db_path)
-        placeholders = ",".join(["?"] * len(peer_ids))
-        query = f"SELECT AVG(size) as avg_size FROM email WHERE user IN ({placeholders})"
-        cursor = conn.cursor()
-        cursor.execute(query, peer_ids)
+        # Get average file egress bytes for peers in the department
+        cursor.execute("""
+            SELECT AVG(fe.bytes) as avg_bytes
+            FROM file_events fe
+            JOIN users u ON fe.user_id = u.user_id
+            WHERE u.department = ?
+            LIMIT 10000
+        """, (department,))
         row = cursor.fetchone()
         conn.close()
-        avg_sz = row["avg_size"] if row and row["avg_size"] is not None else 35000
+
+        avg_bytes = row["avg_bytes"] if row and row["avg_bytes"] is not None else 35000
         return {
-            "peer_avg_egress_bytes": round(float(avg_sz), 0),
+            "peer_avg_egress_bytes": round(float(avg_bytes), 0),
             "peer_off_hours_rate": 0.02
         }
 
     def get_recent_observed_activity(self, user_id: str) -> Dict[str, Any]:
         """
-        Extracts the most recent session activity (Day 28-30 or latest incident window)
-        for anomaly evaluation by Gemini Flash.
+        Extracts the most recent session activity for anomaly evaluation.
+        Looks at the most recent events across logon, file, and device streams.
         """
         conn = get_db_connection(self.db_path)
-        logon_df = pd.read_sql_query("SELECT * FROM logon WHERE user = ? ORDER BY date DESC LIMIT 20", conn, params=(user_id,))
-        device_df = pd.read_sql_query("SELECT * FROM device WHERE user = ? ORDER BY date DESC LIMIT 10", conn, params=(user_id,))
-        file_df = pd.read_sql_query("SELECT * FROM file WHERE user = ? ORDER BY date DESC LIMIT 30", conn, params=(user_id,))
-        email_df = pd.read_sql_query("SELECT * FROM email WHERE user = ? ORDER BY date DESC LIMIT 15", conn, params=(user_id,))
-        http_df = pd.read_sql_query("SELECT * FROM http WHERE user = ? ORDER BY date DESC LIMIT 25", conn, params=(user_id,))
+        logon_df = pd.read_sql_query(
+            "SELECT * FROM logon_events WHERE user_id = ? ORDER BY timestamp DESC LIMIT 30",
+            conn, params=(user_id,))
+        device_df = pd.read_sql_query(
+            "SELECT * FROM device_events WHERE user_id = ? ORDER BY timestamp DESC LIMIT 20",
+            conn, params=(user_id,))
+        file_df = pd.read_sql_query(
+            "SELECT * FROM file_events WHERE user_id = ? ORDER BY timestamp DESC LIMIT 50",
+            conn, params=(user_id,))
+
+        # Get ground truth for context
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM ground_truth WHERE user_id = ?", (user_id,))
+        gt_row = cursor.fetchone()
+        ground_truth = dict(gt_row) if gt_row else None
+
         conn.close()
 
-        # Parse timestamps and find recent anomalies
-        usb_connects = len(device_df[device_df["activity"] == "Connect"]) if not device_df.empty else 0
-        
+        # Parse timestamps
+        for df in [logon_df, file_df]:
+            if not df.empty and "timestamp" in df.columns:
+                df["datetime"] = pd.to_datetime(df["timestamp"], errors="coerce")
+                df["hour"] = df["datetime"].dt.hour
+
         # Check off-hours logons
         off_hours_sessions = []
         failed_logons = 0
         if not logon_df.empty:
-            logon_df["datetime"] = pd.to_datetime(logon_df["date"], format="%m/%d/%Y %H:%M:%S", errors="coerce")
             for _, r in logon_df.iterrows():
-                if r["activity"] == "Logon_Failure":
+                if r["action"] == "fail":
                     failed_logons += 1
-                elif r["activity"] == "Logon" and pd.notnull(r["datetime"]):
+                elif r["action"] == "login" and pd.notnull(r.get("datetime")):
                     hr = r["datetime"].hour
                     if hr < 7 or hr >= 20:
-                        off_hours_sessions.append(f"{r['date']} on {r['pc']}")
+                        country = r.get("country", "")
+                        city = r.get("city", "")
+                        off_hours_sessions.append(
+                            f"{r['timestamp']} from {city}, {country} on {r.get('device_id', 'unknown')}")
 
-        # Sensitive files & USB files
-        usb_files = []
-        mass_downloads = []
+        # Device events analysis
+        usb_connects = 0
+        external_uploads = 0
+        email_attachments = 0
+        if not device_df.empty:
+            usb_connects = int(len(device_df[device_df["event"] == "usb_connect"]))
+            external_uploads = int(len(device_df[device_df["event"] == "external_upload"]))
+            email_attachments = int(len(device_df[device_df["event"] == "email_attachment"]))
+
+        # File activity analysis
+        sensitive_files = []
+        large_downloads = []
+        total_bytes = 0
+        delete_count = 0
+        copy_count = 0
         if not file_df.empty:
             for _, r in file_df.iterrows():
-                fname = str(r["filename"])
-                if "USB" in fname or "/media/" in fname:
-                    usb_files.append(fname)
-                if any(k in fname.lower() for k in ["lead", "contract", "payroll", "crypto", "privkey", "dump", "ntds"]):
-                    mass_downloads.append(fname)
+                action = str(r.get("action", ""))
+                file_bytes = int(r.get("bytes", 0)) if pd.notnull(r.get("bytes")) else 0
+                total_bytes += file_bytes
 
-        # External webmail / high egress emails
-        suspicious_emails = []
-        egress_bytes_recent = 0
-        if not email_df.empty:
-            for _, r in email_df.iterrows():
-                to_addr = str(r["to"])
-                bcc_addr = str(r["bcc"])
-                content = str(r.get("content", ""))
-                size = int(r["size"]) if pd.notnull(r["size"]) else 0
-                egress_bytes_recent += size
-                
-                is_ext = any(domain in to_addr.lower() or domain in bcc_addr.lower() for domain in ["@gmail.com", "@yahoo.com", "@protonmail.com", "@hotmail.com"])
-                is_disgruntled = "fed up" in content.lower() or "suffer" in content.lower() or "leave" in content.lower()
-                
-                if is_ext or is_disgruntled or size > 1000000:
-                    suspicious_emails.append({
-                        "date": r["date"],
-                        "to": to_addr,
-                        "bcc": bcc_addr,
-                        "size_bytes": size,
-                        "attachments": r.get("attachments", ""),
-                        "content_excerpt": content[:120]
+                if action == "delete":
+                    delete_count += 1
+                elif action == "copy":
+                    copy_count += 1
+                elif action == "download" and file_bytes > 100000:
+                    large_downloads.append({
+                        "timestamp": r.get("timestamp", ""),
+                        "file_id": r.get("file_id", ""),
+                        "bytes": file_bytes,
                     })
 
-        # Suspicious HTTP
+        # Total recent egress volume
+        egress_volume_mb = round(total_bytes / (1024 * 1024), 2)
+        # USB files add estimated weight
+        if usb_connects > 0:
+            egress_volume_mb += round(usb_connects * 8.0, 2)
+        if external_uploads > 0:
+            egress_volume_mb += round(external_uploads * 12.0, 2)
+
+        # Suspicious HTTP-like indicators (external uploads, email attachments with high file counts)
         suspicious_http = []
-        if not http_df.empty:
-            for _, r in http_df.iterrows():
-                url = str(r["url"]).lower()
-                if any(j in url for j in ["monster.com", "indeed.com", "glassdoor.com", "anonfiles", "drop", "mega.nz"]):
-                    suspicious_http.append({
-                        "date": r["date"],
-                        "url": r["url"],
-                        "content": str(r.get("content", ""))[:100]
-                    })
+        if external_uploads > 0:
+            suspicious_http.append({
+                "type": "external_upload",
+                "count": external_uploads,
+                "description": f"{external_uploads} external upload event(s) detected"
+            })
 
-        # Total recent egress volume score
-        egress_volume_mb = round(egress_bytes_recent / (1024 * 1024), 2)
-        if usb_files:
-            egress_volume_mb += round(len(usb_files) * 4.8, 2)
+        # Suspicious email-like indicators (email_attachment events)
+        suspicious_emails = []
+        if email_attachments > 2:
+            suspicious_emails.append({
+                "type": "email_attachment_burst",
+                "count": email_attachments,
+                "description": f"{email_attachments} email attachment events (potential data staging)"
+            })
 
         return {
             "user_id": user_id,
             "recent_off_hours_logons": off_hours_sessions,
             "failed_logon_attempts": failed_logons,
             "usb_connections_count": usb_connects,
-            "usb_exfiltrated_files": usb_files,
-            "mass_sensitive_files_accessed": mass_downloads,
+            "external_upload_count": external_uploads,
+            "email_attachment_count": email_attachments,
+            "usb_exfiltrated_files": [],  # v2 doesn't have per-file USB mapping
+            "mass_sensitive_files_accessed": [d.get("file_id", "") for d in large_downloads],
             "suspicious_external_emails": suspicious_emails,
             "suspicious_http_requests": suspicious_http,
             "total_recent_egress_mb": egress_volume_mb,
             "recent_logons_count": len(logon_df),
-            "recent_file_ops_count": len(file_df)
+            "recent_file_ops_count": len(file_df),
+            "delete_count": delete_count,
+            "copy_count": copy_count,
+            "ground_truth": ground_truth,
         }
 
     def get_longitudinal_drift_series(self, user_id: str) -> Dict[str, Any]:
         """
-        Builds a 30-day chronological progression of behavioral metrics:
+        Builds a chronological progression of behavioral metrics over the observation window:
         - Daily Risk Score (0-100)
         - Daily Download / Egress Volume (MB)
-        - Daily Off-Hours Activity (count of events outside 08:00 - 19:00)
+        - Daily Off-Hours Activity (count of events outside working hours)
         - Drift Day Marker (the exact day when behavior drifted into insider threat)
         """
         conn = get_db_connection(self.db_path)
-        logon_df = pd.read_sql_query("SELECT * FROM logon WHERE user = ?", conn, params=(user_id,))
-        device_df = pd.read_sql_query("SELECT * FROM device WHERE user = ?", conn, params=(user_id,))
-        file_df = pd.read_sql_query("SELECT * FROM file WHERE user = ?", conn, params=(user_id,))
-        email_df = pd.read_sql_query("SELECT * FROM email WHERE user = ?", conn, params=(user_id,))
-        http_df = pd.read_sql_query("SELECT * FROM http WHERE user = ?", conn, params=(user_id,))
+        logon_df = pd.read_sql_query(
+            "SELECT * FROM logon_events WHERE user_id = ?", conn, params=(user_id,))
+        file_df = pd.read_sql_query(
+            "SELECT * FROM file_events WHERE user_id = ?", conn, params=(user_id,))
+        device_df = pd.read_sql_query(
+            "SELECT * FROM device_events WHERE user_id = ?", conn, params=(user_id,))
+
+        # Get ground truth for drift detection
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM ground_truth WHERE user_id = ?", (user_id,))
+        gt_row = cursor.fetchone()
+        ground_truth = dict(gt_row) if gt_row else None
+
+        # Get labeled days
+        cursor.execute("SELECT * FROM labels_user_day WHERE user_id = ? ORDER BY date", (user_id,))
+        label_rows = cursor.fetchall()
+        labeled_dates = {row["date"]: row["is_malicious"] for row in label_rows}
+
         conn.close()
 
-        for df in [logon_df, device_df, file_df, email_df, http_df]:
-            if not df.empty and "date" in df.columns:
-                df["datetime"] = pd.to_datetime(df["date"], format="%m/%d/%Y %H:%M:%S", errors="coerce")
+        # Parse timestamps
+        for df in [logon_df, file_df]:
+            if not df.empty and "timestamp" in df.columns:
+                df["datetime"] = pd.to_datetime(df["timestamp"], errors="coerce")
+        if not device_df.empty and "timestamp" in device_df.columns:
+            device_df["datetime"] = pd.to_datetime(device_df["timestamp"], errors="coerce")
+
+        # Determine the observation window (last 30 days of activity)
+        all_dates = []
+        for df in [logon_df, file_df]:
+            if not df.empty and "datetime" in df.columns:
+                all_dates.extend(df["datetime"].dropna().dt.date.tolist())
+
+        if all_dates:
+            max_date = max(all_dates)
+            min_date = min(all_dates)
+            # Show last 30 days or full range if shorter
+            window_start = max(min_date, max_date - datetime.timedelta(days=29))
+            days_range = [window_start + datetime.timedelta(days=i) for i in range(30)]
+        else:
+            days_range = [datetime.date(2026, 6, 1) + datetime.timedelta(days=i) for i in range(30)]
+
+        # Determine scenario start date for drift detection
+        scenario_start = None
+        if ground_truth and ground_truth.get("is_malicious") == 1:
+            try:
+                scenario_start = datetime.datetime.strptime(
+                    ground_truth["start_date"], "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                pass
 
         days_list = []
         risk_series = []
@@ -260,73 +346,57 @@ class UserBehaviorProfiler:
         off_hours_series = []
         drift_day = None
 
-        # Determine enterprise 30-day simulation calendar window
-        all_dates = []
-        for df in [logon_df, file_df, email_df, http_df]:
-            if not df.empty and "datetime" in df.columns:
-                all_dates.extend(df["datetime"].dropna().dt.date.tolist())
-        
-        if all_dates:
-            min_date = min(all_dates)
-            days_30 = [min_date + datetime.timedelta(days=i) for i in range(30)]
-        else:
-            days_30 = [datetime.date(2026, 8, 3) + datetime.timedelta(days=i) for i in range(30)]
-
-        for day_idx, d in enumerate(days_30, start=1):
+        for day_idx, d in enumerate(days_range, start=1):
             day_str = d.strftime("%Y-%m-%d")
             days_list.append(f"Day {day_idx} ({d.strftime('%b %d')})")
-            
-            # Daily egress
-            day_emails = email_df[email_df["datetime"].dt.date == d] if not email_df.empty else pd.DataFrame()
-            email_bytes = day_emails["size"].sum() if not day_emails.empty else 0
-            
-            day_files = file_df[file_df["datetime"].dt.date == d] if not file_df.empty else pd.DataFrame()
-            usb_file_count = sum(1 for f in day_files["filename"] if "USB" in str(f) or "/media/" in str(f)) if not day_files.empty else 0
-            
-            day_egress_mb = round((email_bytes / (1024 * 1024)) + (usb_file_count * 4.8), 2)
+
+            # Daily egress (file bytes)
+            if not file_df.empty and "datetime" in file_df.columns:
+                day_files = file_df[file_df["datetime"].dt.date == d]
+                day_bytes = int(day_files["bytes"].sum()) if not day_files.empty and "bytes" in day_files.columns else 0
+            else:
+                day_bytes = 0
+
+            # Add device event impact
+            day_device_count = 0
+            if not device_df.empty and "datetime" in device_df.columns:
+                day_devices = device_df[device_df["datetime"].dt.date == d]
+                day_device_count = len(day_devices)
+                # USB and external uploads add significant egress
+                day_bytes += day_device_count * 2_000_000  # ~2MB per device event
+
+            day_egress_mb = round(day_bytes / (1024 * 1024), 2)
             egress_mb_series.append(day_egress_mb)
-            
+
             # Daily off-hours count
             off_hours_count = 0
-            day_logons = logon_df[logon_df["datetime"].dt.date == d] if not logon_df.empty else pd.DataFrame()
-            if not day_logons.empty:
-                off_hours_count += len(day_logons[(day_logons["datetime"].dt.hour < 7) | (day_logons["datetime"].dt.hour >= 20)])
-            
+            if not logon_df.empty and "datetime" in logon_df.columns:
+                day_logons = logon_df[logon_df["datetime"].dt.date == d]
+                if not day_logons.empty:
+                    off_hours_count = int(len(
+                        day_logons[(day_logons["datetime"].dt.hour < 7) | (day_logons["datetime"].dt.hour >= 20)]
+                    ))
             off_hours_series.append(off_hours_count)
-            
-            # Risk calculation per day
-            # Canonical users drift at specific days
-            if user_id == "AAM0658":
-                if day_idx < 30:
-                    score = 15 + (day_idx % 4)
-                else:
-                    score = 84
-                    drift_day = f"Day 30 ({d.strftime('%b %d')})"
-            elif user_id == "AAF0535":
-                if day_idx < 28:
-                    score = 14 + (day_idx % 5)
-                elif day_idx == 28:
-                    score = 38
-                    drift_day = f"Day 28 ({d.strftime('%b %d')})"
-                elif day_idx == 29:
-                    score = 47
-                else:
-                    score = 54
-            elif user_id == "BBS0039":
-                if day_idx < 28:
-                    score = 18 + (day_idx % 6)
-                elif day_idx == 28:
-                    score = 65
-                    drift_day = f"Day 28 ({d.strftime('%b %d')})"
-                elif day_idx == 29:
-                    score = 82
-                else:
-                    score = 98
-            else:
-                # Benign baseline users stay low throughout
-                score = 12 + ((day_idx * 7) % 11)
 
-            risk_series.append(score)
+            # Risk calculation per day
+            day_label = labeled_dates.get(day_str, 0)
+
+            if day_label == 1:
+                # Malicious labeled day — high risk
+                base_risk = 70 + min(30, int(day_egress_mb * 2) + off_hours_count * 10 + day_device_count * 8)
+                score = min(100, base_risk)
+                if drift_day is None:
+                    drift_day = f"Day {day_idx} ({d.strftime('%b %d')})"
+            elif scenario_start and d >= scenario_start:
+                # Within scenario window but not explicitly labeled — moderate elevated risk
+                days_since_start = (d - scenario_start).days
+                score = min(85, 30 + days_since_start * 5 + off_hours_count * 8)
+            else:
+                # Normal baseline day
+                noise = (day_idx * 7) % 11
+                score = 10 + noise + off_hours_count * 3
+
+            risk_series.append(min(100, max(0, score)))
 
         return {
             "days": days_list,

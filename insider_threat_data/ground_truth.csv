@@ -1,0 +1,451 @@
+scenario_id,user_id,scenario,is_malicious,start_date,end_date,description
+S0006,SNN2223,M1,1,2026-02-23,2026-02-25,"Subtle M1 compromised account: login from BR within the user's normal hours, 11 files touched over 3 day(s)."
+S0008,EFJ1543,M1,1,2026-02-27,2026-03-02,"Obvious M1 compromised account: off-hours login from new country IN, elevated access to DevOps Confidential/Restricted files."
+S0014,DVB7286,M1,1,2026-03-06,2026-03-08,"Obvious M1 compromised account: off-hours login from new country GB, elevated access to DevOps Confidential/Restricted files."
+S0009,DST2687,M1,1,2026-03-08,2026-03-11,"Subtle M1 compromised account: login from GB within the user's normal hours, 8 files touched over 4 day(s)."
+S0007,XWB0313,M1,1,2026-03-10,2026-03-13,"Moderate M1 compromised account: off-hours login from new country DE, elevated access to Engineering Confidential/Restricted files."
+S0002,TJX7065,M1,1,2026-03-13,2026-03-13,"Obvious M1 compromised account: off-hours login from new country IN, elevated access to DevOps Confidential/Restricted files."
+S0020,GUZ0270,M1,1,2026-03-14,2026-03-16,"Obvious M1 compromised account: off-hours login from new country BR, elevated access to Engineering Confidential/Restricted files."
+S0021,QRU5619,M1,1,2026-04-20,2026-04-23,"Subtle M1 compromised account: login from US within the user's normal hours, 9 files touched over 4 day(s)."
+S0000,HZA0727,M1,1,2026-04-26,2026-04-27,"Subtle M1 compromised account: login from DE within the user's normal hours, 13 files touched over 2 day(s)."
+S0011,BRD9424,M1,1,2026-04-27,2026-04-28,"Obvious M1 compromised account: off-hours login from new country GB, elevated access to DevOps Confidential/Restricted files."
+S0012,KHV5264,M1,1,2026-05-05,2026-05-07,"Subtle M1 compromised account: login from US within the user's normal hours, 13 files touched over 3 day(s)."
+S0019,NWE6943,M1,1,2026-05-05,2026-05-08,"Moderate M1 compromised account: off-hours login from new country US, elevated access to Support Confidential/Restricted files."
+S0013,PEH7036,M1,1,2026-05-08,2026-05-11,"Moderate M1 compromised account: off-hours login from new country BR, elevated access to Sales Confidential/Restricted files."
+S0001,JJX7773,M1,1,2026-05-10,2026-05-10,"Moderate M1 compromised account: off-hours login from new country DE, elevated access to Sales Confidential/Restricted files."
+S0017,YVK4363,M1,1,2026-05-13,2026-05-14,"Obvious M1 compromised account: off-hours login from new country US, elevated access to Support Confidential/Restricted files."
+S0016,HMZ5952,M1,1,2026-05-22,2026-05-22,"Moderate M1 compromised account: off-hours login from new country IN, elevated access to IT Confidential/Restricted files."
+S0015,LQL0537,M1,1,2026-05-30,2026-05-31,"Subtle M1 compromised account: login from IN within the user's normal hours, 8 files touched over 2 day(s)."
+S0018,KFN4851,M1,1,2026-05-30,2026-06-02,"Subtle M1 compromised account: login from IN within the user's normal hours, 8 files touched over 4 day(s)."
+S0010,XFK4688,M1,1,2026-06-06,2026-06-09,"Moderate M1 compromised account: off-hours login from new country GB, elevated access to Engineering Confidential/Restricted files."
+S0005,UKK9924,M1,1,2026-06-10,2026-06-10,"Obvious M1 compromised account: off-hours login from new country US, elevated access to Sales Confidential/Restricted files."
+S0003,DSE9841,M1,1,2026-06-11,2026-06-15,"Subtle M1 compromised account: login from DE within the user's normal hours, 8 files touched over 5 day(s)."
+S0004,MAV1191,M1,1,2026-06-24,2026-06-27,"Moderate M1 compromised account: off-hours login from new country GB, elevated access to Support Confidential/Restricted files."
+S0042,KHX2969,M2,1,2026-03-09,2026-03-15,"Subtle M2 exit exfiltration: escalating Engineering Confidential/Restricted downloads over 7 days, USB use, external upload near the end. Resignation notice on file."
+S0025,ZXZ4586,M2,1,2026-03-14,2026-03-24,"Moderate M2 exit exfiltration: escalating Engineering Confidential/Restricted downloads over 11 days, USB use, external upload near the end. Resignation notice on file."
+S0036,WZE9326,M2,1,2026-03-14,2026-03-20,"Subtle M2 exit exfiltration: escalating HR Confidential/Restricted downloads over 7 days, USB use, external upload near the end. Resignation notice on file."
+S0043,BKG3081,M2,1,2026-03-17,2026-03-29,"Moderate M2 exit exfiltration: escalating Engineering Confidential/Restricted downloads over 13 days, USB use, external upload near the end. No resignation notice on file."
+S0024,HHT2257,M2,1,2026-03-18,2026-03-25,"Subtle M2 exit exfiltration: escalating Sales Confidential/Restricted downloads over 8 days, USB use, external upload near the end. No resignation notice on file."
+S0031,WRB3527,M2,1,2026-03-19,2026-03-31,"Moderate M2 exit exfiltration: escalating DevOps Confidential/Restricted downloads over 13 days, USB use, external upload near the end. No resignation notice on file."
+S0035,MPR8653,M2,1,2026-03-30,2026-04-08,"Obvious M2 exit exfiltration: escalating Finance Confidential/Restricted downloads over 10 days, USB use, external upload near the end. Resignation notice on file."
+S0030,VMP1735,M2,1,2026-04-03,2026-04-15,"Subtle M2 exit exfiltration: escalating Sales Confidential/Restricted downloads over 13 days, USB use, external upload near the end. No resignation notice on file."
+S0029,QZQ7908,M2,1,2026-04-20,2026-04-25,"Obvious M2 exit exfiltration: escalating DevOps Confidential/Restricted downloads over 6 days, USB use, external upload near the end. No resignation notice on file."
+S0040,FKX1002,M2,1,2026-04-21,2026-04-26,"Moderate M2 exit exfiltration: escalating Finance Confidential/Restricted downloads over 6 days, USB use, external upload near the end. Resignation notice on file."
+S0039,KAQ4260,M2,1,2026-04-24,2026-05-07,"Subtle M2 exit exfiltration: escalating HR Confidential/Restricted downloads over 14 days, USB use, external upload near the end. Resignation notice on file."
+S0023,EJK9290,M2,1,2026-04-27,2026-05-10,"Obvious M2 exit exfiltration: escalating Support Confidential/Restricted downloads over 14 days, USB use, external upload near the end. Resignation notice on file."
+S0032,YSX2928,M2,1,2026-05-02,2026-05-12,"Obvious M2 exit exfiltration: escalating Engineering Confidential/Restricted downloads over 11 days, USB use, external upload near the end. Resignation notice on file."
+S0027,CPS9069,M2,1,2026-05-10,2026-05-19,"Subtle M2 exit exfiltration: escalating IT Confidential/Restricted downloads over 10 days, USB use, external upload near the end. Resignation notice on file."
+S0038,QFJ3194,M2,1,2026-05-16,2026-05-25,"Obvious M2 exit exfiltration: escalating DevOps Confidential/Restricted downloads over 10 days, USB use, external upload near the end. Resignation notice on file."
+S0026,UWY3981,M2,1,2026-05-19,2026-05-30,"Obvious M2 exit exfiltration: escalating Support Confidential/Restricted downloads over 12 days, USB use, external upload near the end. No resignation notice on file."
+S0028,UHB1648,M2,1,2026-05-20,2026-06-02,"Moderate M2 exit exfiltration: escalating Finance Confidential/Restricted downloads over 14 days, USB use, external upload near the end. Resignation notice on file."
+S0034,ADL7522,M2,1,2026-05-26,2026-05-31,"Moderate M2 exit exfiltration: escalating Engineering Confidential/Restricted downloads over 6 days, USB use, external upload near the end. No resignation notice on file."
+S0022,SQE3562,M2,1,2026-05-29,2026-06-07,"Moderate M2 exit exfiltration: escalating DevOps Confidential/Restricted downloads over 10 days, USB use, external upload near the end. Resignation notice on file."
+S0041,VPM8632,M2,1,2026-05-30,2026-06-11,"Obvious M2 exit exfiltration: escalating DevOps Confidential/Restricted downloads over 13 days, USB use, external upload near the end. No resignation notice on file."
+S0037,YWJ6443,M2,1,2026-06-14,2026-06-24,"Moderate M2 exit exfiltration: escalating IT Confidential/Restricted downloads over 11 days, USB use, external upload near the end. Resignation notice on file."
+S0033,NZT5565,M2,1,2026-06-23,2026-06-29,"Subtle M2 exit exfiltration: escalating Sales Confidential/Restricted downloads over 7 days, USB use, external upload near the end. Resignation notice on file."
+S0060,UPJ2100,M3,1,2026-02-16,2026-03-23,"Subtle M3 privilege creep: gradual cross-department access into Legal over 36 days, rising toward Confidential/Restricted."
+S0061,YPA6465,M3,1,2026-02-20,2026-03-31,"Moderate M3 privilege creep: gradual cross-department access into Engineering over 40 days, rising toward Confidential/Restricted."
+S0058,QJS2178,M3,1,2026-02-21,2026-04-03,"Moderate M3 privilege creep: gradual cross-department access into Support over 42 days, rising toward Confidential/Restricted."
+S0056,RPB6169,M3,1,2026-02-22,2026-03-28,"Obvious M3 privilege creep: gradual cross-department access into DevOps over 35 days, rising toward Confidential/Restricted."
+S0064,QDN2660,M3,1,2026-02-24,2026-04-09,"Moderate M3 privilege creep: gradual cross-department access into Legal over 45 days, rising toward Confidential/Restricted."
+S0063,DDH6028,M3,1,2026-03-03,2026-04-02,"Subtle M3 privilege creep: gradual cross-department access into Sales over 31 days, rising toward Confidential/Restricted."
+S0059,AGQ6804,M3,1,2026-03-04,2026-04-10,"Obvious M3 privilege creep: gradual cross-department access into Finance over 38 days, rising toward Confidential/Restricted."
+S0044,XPG0614,M3,1,2026-03-10,2026-04-20,"Obvious M3 privilege creep: gradual cross-department access into Finance over 42 days, rising toward Confidential/Restricted."
+S0054,BMC8908,M3,1,2026-03-12,2026-04-11,"Subtle M3 privilege creep: gradual cross-department access into HR over 31 days, rising toward Confidential/Restricted."
+S0062,LSK8578,M3,1,2026-03-14,2026-04-23,"Obvious M3 privilege creep: gradual cross-department access into Finance over 41 days, rising toward Confidential/Restricted."
+S0057,MEG7072,M3,1,2026-03-30,2026-05-03,"Subtle M3 privilege creep: gradual cross-department access into Legal over 35 days, rising toward Confidential/Restricted."
+S0048,LQC3932,M3,1,2026-04-18,2026-05-25,"Subtle M3 privilege creep: gradual cross-department access into Support over 38 days, rising toward Confidential/Restricted."
+S0055,GJF6121,M3,1,2026-04-18,2026-05-25,"Moderate M3 privilege creep: gradual cross-department access into IT over 38 days, rising toward Confidential/Restricted."
+S0047,KGW8827,M3,1,2026-04-21,2026-06-03,"Obvious M3 privilege creep: gradual cross-department access into Legal over 44 days, rising toward Confidential/Restricted."
+S0045,CGR6865,M3,1,2026-04-29,2026-06-01,"Subtle M3 privilege creep: gradual cross-department access into IT over 34 days, rising toward Confidential/Restricted."
+S0050,HGD7422,M3,1,2026-04-29,2026-06-02,"Obvious M3 privilege creep: gradual cross-department access into Legal over 35 days, rising toward Confidential/Restricted."
+S0051,NPU2327,M3,1,2026-05-04,2026-06-14,"Subtle M3 privilege creep: gradual cross-department access into DevOps over 42 days, rising toward Confidential/Restricted."
+S0052,YXE8184,M3,1,2026-05-04,2026-06-15,"Moderate M3 privilege creep: gradual cross-department access into Legal over 43 days, rising toward Confidential/Restricted."
+S0046,BXQ0249,M3,1,2026-05-08,2026-06-11,"Moderate M3 privilege creep: gradual cross-department access into Finance over 35 days, rising toward Confidential/Restricted."
+S0049,MDE9058,M3,1,2026-05-19,2026-06-17,"Moderate M3 privilege creep: gradual cross-department access into Finance over 30 days, rising toward Confidential/Restricted."
+S0065,LUW6194,M3,1,2026-05-21,2026-06-22,"Obvious M3 privilege creep: gradual cross-department access into IT over 33 days, rising toward Confidential/Restricted."
+S0053,RHK5954,M3,1,2026-05-23,2026-06-22,"Obvious M3 privilege creep: gradual cross-department access into Finance over 31 days, rising toward Confidential/Restricted."
+S0086,QAK7911,M4,1,2026-02-15,2026-03-03,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from US and IN on the same day.
+S0070,GCD1014,M4,1,2026-02-26,2026-03-17,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from IN and DE on the same day.
+S0077,XLD3365,M4,1,2026-03-04,2026-03-21,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from IN and GB on the same day.
+S0078,ZHK7052,M4,1,2026-03-17,2026-04-01,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from GB and BR on the same day.
+S0080,BSW8923,M4,1,2026-03-18,2026-04-03,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from US and IN on the same day.
+S0068,ETS6294,M4,1,2026-03-19,2026-04-04,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from IN and BR on the same day.
+S0079,VFK7595,M4,1,2026-03-23,2026-04-06,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from US and DE on the same day.
+S0082,TDZ7818,M4,1,2026-03-31,2026-04-11,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from DE and GB on the same day.
+S0075,QDB3652,M4,1,2026-04-03,2026-04-21,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from GB and BR on the same day.
+S0066,FVY5415,M4,1,2026-04-08,2026-04-19,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from US and GB on the same day.
+S0072,TZF4164,M4,1,2026-04-11,2026-04-29,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from US and DE on the same day.
+S0074,JWE8116,M4,1,2026-04-21,2026-05-10,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from GB and IN on the same day.
+S0085,UUZ0064,M4,1,2026-04-21,2026-05-10,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from GB and US on the same day.
+S0073,DYE9273,M4,1,2026-04-23,2026-05-04,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from US and BR on the same day.
+S0069,VYT8978,M4,1,2026-04-27,2026-05-07,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from DE and US on the same day.
+S0084,FHC5582,M4,1,2026-05-04,2026-05-22,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from US and BR on the same day.
+S0071,PUJ9838,M4,1,2026-05-05,2026-05-18,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from IN and GB on the same day.
+S0081,WSK1631,M4,1,2026-05-12,2026-05-30,Subtle M4 impossible travel: 2 instance(s) of concurrent overlapping sessions from US and GB on the same day.
+S0076,AFL5958,M4,1,2026-05-24,2026-06-10,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from GB and US on the same day.
+S0083,YYC2668,M4,1,2026-05-26,2026-06-06,Obvious M4 impossible travel: 6 instance(s) of concurrent overlapping sessions from US and BR on the same day.
+S0067,LAD8190,M4,1,2026-06-14,2026-06-29,Moderate M4 impossible travel: 4 instance(s) of concurrent overlapping sessions from DE and GB on the same day.
+S0098,GMQ7067,M5,1,2026-02-18,2026-02-22,"Obvious M5 data staging via email: elevated email_attachment activity on Legal Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0094,ZZH3377,M5,1,2026-02-19,2026-02-22,"Moderate M5 data staging via email: elevated email_attachment activity on Sales Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0089,WZQ9342,M5,1,2026-02-27,2026-03-02,"Obvious M5 data staging via email: elevated email_attachment activity on Support Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0096,MFB4161,M5,1,2026-03-08,2026-03-12,"Subtle M5 data staging via email: elevated email_attachment activity on Support Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0087,UYH3482,M5,1,2026-03-13,2026-03-15,"Subtle M5 data staging via email: elevated email_attachment activity on Finance Confidential/Restricted files over 3 days, no USB, read volume near normal."
+S0092,NDP9334,M5,1,2026-03-18,2026-03-21,"Obvious M5 data staging via email: elevated email_attachment activity on DevOps Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0102,YJK5622,M5,1,2026-03-27,2026-03-29,"Subtle M5 data staging via email: elevated email_attachment activity on Support Confidential/Restricted files over 3 days, no USB, read volume near normal."
+S0103,VVL2346,M5,1,2026-03-27,2026-03-31,"Moderate M5 data staging via email: elevated email_attachment activity on Sales Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0091,LCT5452,M5,1,2026-03-28,2026-04-01,"Moderate M5 data staging via email: elevated email_attachment activity on Finance Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0107,EXR0869,M5,1,2026-03-30,2026-04-02,"Obvious M5 data staging via email: elevated email_attachment activity on IT Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0106,DEC1796,M5,1,2026-04-02,2026-04-05,"Moderate M5 data staging via email: elevated email_attachment activity on Engineering Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0105,CQW5666,M5,1,2026-04-03,2026-04-07,"Subtle M5 data staging via email: elevated email_attachment activity on IT Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0090,AMT3951,M5,1,2026-04-13,2026-04-17,"Subtle M5 data staging via email: elevated email_attachment activity on Engineering Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0101,RPB2221,M5,1,2026-04-14,2026-04-17,"Obvious M5 data staging via email: elevated email_attachment activity on Finance Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0100,PBM4108,M5,1,2026-05-08,2026-05-11,"Moderate M5 data staging via email: elevated email_attachment activity on DevOps Confidential/Restricted files over 4 days, no USB, read volume near normal."
+S0097,DTW2539,M5,1,2026-05-17,2026-05-19,"Moderate M5 data staging via email: elevated email_attachment activity on Sales Confidential/Restricted files over 3 days, no USB, read volume near normal."
+S0099,DLN5803,M5,1,2026-06-01,2026-06-05,"Subtle M5 data staging via email: elevated email_attachment activity on IT Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0104,FAP0273,M5,1,2026-06-01,2026-06-05,"Obvious M5 data staging via email: elevated email_attachment activity on Sales Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0093,WMT1608,M5,1,2026-06-05,2026-06-09,"Subtle M5 data staging via email: elevated email_attachment activity on DevOps Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0095,BPW6998,M5,1,2026-06-06,2026-06-10,"Obvious M5 data staging via email: elevated email_attachment activity on Sales Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0088,XJU4690,M5,1,2026-06-07,2026-06-11,"Moderate M5 data staging via email: elevated email_attachment activity on IT Confidential/Restricted files over 5 days, no USB, read volume near normal."
+S0122,PJM7982,M6,1,2026-02-19,2026-02-20,"Obvious M6 sabotage: burst of 33 deletes on HR files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0108,VKV9371,M6,1,2026-02-22,2026-02-22,"Subtle M6 sabotage: burst of 12 deletes on Engineering files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0123,YEL9905,M6,1,2026-02-22,2026-02-23,"Subtle M6 sabotage: burst of 10 deletes on IT files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0126,LCT4451,M6,1,2026-03-01,2026-03-01,"Subtle M6 sabotage: burst of 14 deletes on IT files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0112,TBE1642,M6,1,2026-03-08,2026-03-10,"Moderate M6 sabotage: burst of 27 deletes on Engineering files across 3 day(s), partly off-hours, activity returns to normal afterward."
+S0113,DHT3461,M6,1,2026-03-13,2026-03-13,"Obvious M6 sabotage: burst of 40 deletes on IT files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0110,FUK6375,M6,1,2026-03-14,2026-03-16,"Obvious M6 sabotage: burst of 33 deletes on Sales files across 3 day(s), partly off-hours, activity returns to normal afterward."
+S0114,QLT1421,M6,1,2026-03-14,2026-03-14,"Subtle M6 sabotage: burst of 8 deletes on Engineering files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0109,WNZ8194,M6,1,2026-03-19,2026-03-19,"Moderate M6 sabotage: burst of 29 deletes on HR files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0120,AJM2807,M6,1,2026-04-03,2026-04-04,"Subtle M6 sabotage: burst of 12 deletes on Support files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0125,RWR4951,M6,1,2026-04-05,2026-04-06,"Obvious M6 sabotage: burst of 42 deletes on Finance files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0119,VNR5092,M6,1,2026-04-06,2026-04-08,"Obvious M6 sabotage: burst of 34 deletes on Sales files across 3 day(s), partly off-hours, activity returns to normal afterward."
+S0116,LWR1242,M6,1,2026-04-08,2026-04-10,"Obvious M6 sabotage: burst of 48 deletes on DevOps files across 3 day(s), partly off-hours, activity returns to normal afterward."
+S0118,FGX9186,M6,1,2026-04-08,2026-04-09,"Moderate M6 sabotage: burst of 21 deletes on DevOps files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0121,QKS9196,M6,1,2026-04-11,2026-04-11,"Moderate M6 sabotage: burst of 22 deletes on Engineering files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0124,MJM7888,M6,1,2026-05-03,2026-05-05,"Moderate M6 sabotage: burst of 24 deletes on DevOps files across 3 day(s), partly off-hours, activity returns to normal afterward."
+S0111,DEX6345,M6,1,2026-05-10,2026-05-10,"Subtle M6 sabotage: burst of 10 deletes on Sales files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0127,LNX5432,M6,1,2026-06-03,2026-06-04,"Moderate M6 sabotage: burst of 24 deletes on Finance files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0115,WHX4263,M6,1,2026-06-12,2026-06-13,"Moderate M6 sabotage: burst of 16 deletes on Sales files across 2 day(s), partly off-hours, activity returns to normal afterward."
+S0117,YLA7200,M6,1,2026-06-24,2026-06-24,"Subtle M6 sabotage: burst of 9 deletes on Sales files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0128,AHL0182,M6,1,2026-07-01,2026-07-01,"Obvious M6 sabotage: burst of 32 deletes on Engineering files across 1 day(s), partly off-hours, activity returns to normal afterward."
+S0136,PJA2498,M7,1,2026-02-16,2026-03-24,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 37 days.
+S0149,PMV7499,M7,1,2026-02-27,2026-03-28,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 30 days.
+S0131,AFF2174,M7,1,2026-03-02,2026-04-09,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 39 days.
+S0144,MPF6269,M7,1,2026-03-06,2026-04-13,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 39 days.
+S0142,HVQ8555,M7,1,2026-03-14,2026-04-10,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 28 days.
+S0147,TNT2352,M7,1,2026-03-14,2026-04-14,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 32 days.
+S0145,SBE6209,M7,1,2026-03-17,2026-04-13,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 28 days.
+S0146,CQK5506,M7,1,2026-03-20,2026-04-15,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 27 days.
+S0138,GSN3813,M7,1,2026-04-01,2026-04-21,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 21 days.
+S0133,CEG0096,M7,1,2026-04-07,2026-04-27,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 21 days.
+S0140,TRT5910,M7,1,2026-04-08,2026-05-03,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 26 days.
+S0135,HEP6887,M7,1,2026-04-17,2026-05-27,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 41 days.
+S0143,AGH1760,M7,1,2026-05-03,2026-06-12,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 41 days.
+S0141,CPQ2082,M7,1,2026-05-04,2026-05-29,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 26 days.
+S0137,GDQ4471,M7,1,2026-05-07,2026-05-31,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 25 days.
+S0134,FNB0006,M7,1,2026-05-12,2026-06-11,Obvious M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 31 days.
+S0148,RGD4993,M7,1,2026-05-13,2026-06-16,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 35 days.
+S0139,KMY8772,M7,1,2026-05-20,2026-06-11,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 23 days.
+S0130,PLP3673,M7,1,2026-05-26,2026-06-16,Moderate M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 22 days.
+S0132,PYE7970,M7,1,2026-05-28,2026-06-24,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 28 days.
+S0129,XUY0616,M7,1,2026-05-31,2026-06-30,Subtle M7 credential sharing: a second device active in the same country with sessions overlapping the primary device across 31 days.
+S0177,NSQ4495,business_travel,0,2026-02-15,2026-02-23,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0157,PTJ4935,business_travel,0,2026-02-17,2026-02-24,Business travel decoy: sessions from IN during a work trip (first visit to this country); access pattern and hours remain normal.
+S0190,DHG3808,business_travel,0,2026-02-19,2026-02-26,Business travel decoy: sessions from BR during a work trip (first visit to this country); access pattern and hours remain normal.
+S0169,RPU8492,business_travel,0,2026-02-26,2026-03-04,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0163,SHS0097,business_travel,0,2026-02-28,2026-03-09,Business travel decoy: sessions from US during a work trip (first visit to this country); access pattern and hours remain normal.
+S0156,TTT4652,business_travel,0,2026-03-07,2026-03-11,Business travel decoy: sessions from DE during a work trip (first visit to this country); access pattern and hours remain normal.
+S0188,CFT8853,business_travel,0,2026-03-17,2026-03-26,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0150,QMM7832,business_travel,0,2026-03-21,2026-03-27,Business travel decoy: sessions from BR during a work trip (first visit to this country); access pattern and hours remain normal.
+S0171,KQF9279,business_travel,0,2026-03-22,2026-03-27,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0181,MLC0444,business_travel,0,2026-03-31,2026-04-04,Business travel decoy: sessions from US during a work trip (first visit to this country); access pattern and hours remain normal.
+S0184,RHN7379,business_travel,0,2026-03-31,2026-04-03,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0170,HAB6562,business_travel,0,2026-04-01,2026-04-07,Business travel decoy: sessions from BR during a work trip (first visit to this country); access pattern and hours remain normal.
+S0186,LKX2108,business_travel,0,2026-04-03,2026-04-09,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0173,SPM1999,business_travel,0,2026-04-07,2026-04-15,Business travel decoy: sessions from US during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0166,PDG5421,business_travel,0,2026-04-11,2026-04-14,Business travel decoy: sessions from US during a work trip (first visit to this country); access pattern and hours remain normal.
+S0155,JYU4145,business_travel,0,2026-04-15,2026-04-23,Business travel decoy: sessions from GB during a work trip (first visit to this country); access pattern and hours remain normal.
+S0168,YYV5359,business_travel,0,2026-04-19,2026-04-26,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0174,RQF4228,business_travel,0,2026-04-20,2026-04-27,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0191,FXZ4153,business_travel,0,2026-04-23,2026-04-27,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0178,WYX0098,business_travel,0,2026-04-25,2026-05-04,Business travel decoy: sessions from US during a work trip (first visit to this country); access pattern and hours remain normal.
+S0158,MJD5091,business_travel,0,2026-05-01,2026-05-08,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0162,JRD4682,business_travel,0,2026-05-02,2026-05-07,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0175,GTS1980,business_travel,0,2026-05-04,2026-05-12,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0153,XAA3696,business_travel,0,2026-05-06,2026-05-13,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0187,FMC2914,business_travel,0,2026-05-07,2026-05-10,Business travel decoy: sessions from GB during a work trip (first visit to this country); access pattern and hours remain normal.
+S0160,UKE7449,business_travel,0,2026-05-12,2026-05-18,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0152,XDY0096,business_travel,0,2026-05-14,2026-05-23,Business travel decoy: sessions from US during a work trip (first visit to this country); access pattern and hours remain normal.
+S0182,PAJ2937,business_travel,0,2026-05-14,2026-05-20,Business travel decoy: sessions from IN during a work trip (first visit to this country); access pattern and hours remain normal.
+S0180,NUC9178,business_travel,0,2026-05-19,2026-05-27,Business travel decoy: sessions from GB during a work trip (first visit to this country); access pattern and hours remain normal.
+S0172,UUQ7472,business_travel,0,2026-05-25,2026-05-28,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0189,WZM1211,business_travel,0,2026-05-25,2026-06-01,Business travel decoy: sessions from US during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0164,MDD1815,business_travel,0,2026-05-27,2026-06-05,Business travel decoy: sessions from IN during a work trip (first visit to this country); access pattern and hours remain normal.
+S0192,ENQ5809,business_travel,0,2026-05-30,2026-06-07,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0165,BKG0428,business_travel,0,2026-06-04,2026-06-12,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0176,BNC0564,business_travel,0,2026-06-06,2026-06-09,Business travel decoy: sessions from DE during a work trip (first visit to this country); access pattern and hours remain normal.
+S0167,NNN7074,business_travel,0,2026-06-10,2026-06-19,Business travel decoy: sessions from BR during a work trip (first visit to this country); access pattern and hours remain normal.
+S0179,JQS8684,business_travel,0,2026-06-11,2026-06-13,Business travel decoy: sessions from IN during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0183,MHF4555,business_travel,0,2026-06-11,2026-06-18,Business travel decoy: sessions from IN during a work trip (first visit to this country); access pattern and hours remain normal.
+S0151,TSJ9915,business_travel,0,2026-06-14,2026-06-19,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0161,PHM0513,business_travel,0,2026-06-17,2026-06-22,Business travel decoy: sessions from GB during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0159,HZX9435,business_travel,0,2026-06-22,2026-07-01,Business travel decoy: sessions from DE during a work trip (first visit to this country); access pattern and hours remain normal.
+S0185,MQC6265,business_travel,0,2026-06-23,2026-06-27,Business travel decoy: sessions from DE during a work trip (first visit to this country); access pattern and hours remain normal.
+S0154,PWL2596,business_travel,0,2026-06-24,2026-06-29,Business travel decoy: sessions from BR during a work trip (a country previously visited on business); access pattern and hours remain normal.
+S0402,RZU1592,legit_role_change,0,2026-02-19,2026-03-10,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Legal."
+S0394,DKY8909,legit_role_change,0,2026-02-24,2026-03-14,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Engineering."
+S0400,ZZA4587,legit_role_change,0,2026-03-03,2026-03-26,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Finance."
+S0365,PBG2200,legit_role_change,0,2026-03-13,2026-04-04,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0389,SZU0525,legit_role_change,0,2026-03-14,2026-04-03,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into DevOps."
+S0384,DQZ4406,legit_role_change,0,2026-03-17,2026-04-10,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Legal."
+S0401,RZR1761,legit_role_change,0,2026-03-18,2026-04-08,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Legal."
+S0404,LCB1568,legit_role_change,0,2026-03-23,2026-04-07,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0387,VJS9473,legit_role_change,0,2026-03-25,2026-04-16,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Support."
+S0375,KDX8366,legit_role_change,0,2026-03-27,2026-04-19,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into DevOps."
+S0368,CNY0484,legit_role_change,0,2026-03-29,2026-04-18,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0395,RLF5434,legit_role_change,0,2026-04-03,2026-04-17,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Engineering."
+S0407,NAF6431,legit_role_change,0,2026-04-03,2026-04-25,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Finance."
+S0380,LJF1648,legit_role_change,0,2026-04-06,2026-04-26,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Legal."
+S0391,LWK9207,legit_role_change,0,2026-04-07,2026-04-28,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0403,ZYZ3045,legit_role_change,0,2026-04-09,2026-04-26,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0398,XNB5488,legit_role_change,0,2026-04-10,2026-05-03,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Engineering."
+S0383,QWV1502,legit_role_change,0,2026-04-11,2026-04-30,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0378,HQY0328,legit_role_change,0,2026-04-12,2026-05-02,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0405,WFZ8385,legit_role_change,0,2026-04-13,2026-04-28,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Support."
+S0369,ZPM1121,legit_role_change,0,2026-04-16,2026-05-01,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Support."
+S0373,THA0831,legit_role_change,0,2026-04-18,2026-05-09,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Engineering."
+S0386,WSN8487,legit_role_change,0,2026-04-20,2026-05-06,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Legal."
+S0371,RTK6170,legit_role_change,0,2026-04-25,2026-05-11,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into DevOps."
+S0374,MUX6778,legit_role_change,0,2026-04-26,2026-05-15,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0376,EEL8338,legit_role_change,0,2026-04-27,2026-05-16,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0385,NFG5180,legit_role_change,0,2026-04-27,2026-05-17,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into IT."
+S0382,WZD7435,legit_role_change,0,2026-04-29,2026-05-13,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into IT."
+S0381,JKQ9983,legit_role_change,0,2026-04-30,2026-05-19,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0406,LBZ7347,legit_role_change,0,2026-05-03,2026-05-23,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into DevOps."
+S0388,URV9227,legit_role_change,0,2026-05-05,2026-05-26,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Support."
+S0370,UWT0424,legit_role_change,0,2026-05-08,2026-06-01,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0372,PCH7421,legit_role_change,0,2026-05-10,2026-05-25,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into IT."
+S0393,HNV3692,legit_role_change,0,2026-05-10,2026-05-31,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into DevOps."
+S0397,GKB5174,legit_role_change,0,2026-05-10,2026-05-29,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0379,SXN1549,legit_role_change,0,2026-05-17,2026-06-05,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0390,FGK0491,legit_role_change,0,2026-05-20,2026-06-12,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0392,LGB8139,legit_role_change,0,2026-05-21,2026-06-05,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into IT."
+S0399,WPP7340,legit_role_change,0,2026-05-23,2026-06-15,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Finance."
+S0377,FGU4691,legit_role_change,0,2026-06-05,2026-06-28,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into IT."
+S0396,UDC1036,legit_role_change,0,2026-06-07,2026-07-01,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Sales."
+S0366,LXZ8609,legit_role_change,0,2026-06-12,2026-06-26,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into Support."
+S0367,KRB4673,legit_role_change,0,2026-06-12,2026-06-29,"Legitimate role-change decoy: HR role_change on file, followed by expanded access into HR."
+S0341,DDB3409,new_hire_onboarding,0,2026-02-15,2026-03-19,New-hire onboarding decoy: gradually broadening Engineering access over 33 days as normal ramp-up.
+S0348,WTA6371,new_hire_onboarding,0,2026-02-15,2026-03-18,New-hire onboarding decoy: gradually broadening Support access over 32 days as normal ramp-up.
+S0339,JNY6012,new_hire_onboarding,0,2026-02-17,2026-03-14,New-hire onboarding decoy: gradually broadening Engineering access over 26 days as normal ramp-up.
+S0350,FAM1900,new_hire_onboarding,0,2026-02-17,2026-03-21,New-hire onboarding decoy: gradually broadening DevOps access over 33 days as normal ramp-up.
+S0325,XJR8615,new_hire_onboarding,0,2026-02-21,2026-03-19,New-hire onboarding decoy: gradually broadening Engineering access over 27 days as normal ramp-up.
+S0349,SFV7598,new_hire_onboarding,0,2026-02-21,2026-03-19,New-hire onboarding decoy: gradually broadening DevOps access over 27 days as normal ramp-up.
+S0355,VVU9833,new_hire_onboarding,0,2026-02-23,2026-03-20,New-hire onboarding decoy: gradually broadening Engineering access over 26 days as normal ramp-up.
+S0357,WQD6977,new_hire_onboarding,0,2026-02-23,2026-03-28,New-hire onboarding decoy: gradually broadening Support access over 34 days as normal ramp-up.
+S0326,CZV3763,new_hire_onboarding,0,2026-02-25,2026-03-30,New-hire onboarding decoy: gradually broadening DevOps access over 34 days as normal ramp-up.
+S0322,PGM8326,new_hire_onboarding,0,2026-02-26,2026-03-30,New-hire onboarding decoy: gradually broadening Engineering access over 33 days as normal ramp-up.
+S0340,EXR7447,new_hire_onboarding,0,2026-03-02,2026-04-01,New-hire onboarding decoy: gradually broadening HR access over 31 days as normal ramp-up.
+S0343,UQJ8329,new_hire_onboarding,0,2026-03-02,2026-04-03,New-hire onboarding decoy: gradually broadening Finance access over 33 days as normal ramp-up.
+S0356,ASX1419,new_hire_onboarding,0,2026-03-08,2026-04-11,New-hire onboarding decoy: gradually broadening Support access over 35 days as normal ramp-up.
+S0363,FRW3182,new_hire_onboarding,0,2026-03-09,2026-04-10,New-hire onboarding decoy: gradually broadening Engineering access over 33 days as normal ramp-up.
+S0354,BYQ0055,new_hire_onboarding,0,2026-03-25,2026-04-25,New-hire onboarding decoy: gradually broadening Sales access over 32 days as normal ramp-up.
+S0362,FKD9447,new_hire_onboarding,0,2026-03-28,2026-04-30,New-hire onboarding decoy: gradually broadening Sales access over 34 days as normal ramp-up.
+S0330,NKG7115,new_hire_onboarding,0,2026-03-29,2026-05-01,New-hire onboarding decoy: gradually broadening IT access over 34 days as normal ramp-up.
+S0337,XYA5835,new_hire_onboarding,0,2026-03-30,2026-05-02,New-hire onboarding decoy: gradually broadening IT access over 34 days as normal ramp-up.
+S0344,HQK3324,new_hire_onboarding,0,2026-04-01,2026-04-29,New-hire onboarding decoy: gradually broadening Support access over 29 days as normal ramp-up.
+S0352,FHR9973,new_hire_onboarding,0,2026-04-06,2026-05-03,New-hire onboarding decoy: gradually broadening Engineering access over 28 days as normal ramp-up.
+S0353,VYY0720,new_hire_onboarding,0,2026-04-07,2026-05-07,New-hire onboarding decoy: gradually broadening Engineering access over 31 days as normal ramp-up.
+S0324,TQS5889,new_hire_onboarding,0,2026-04-08,2026-05-07,New-hire onboarding decoy: gradually broadening IT access over 30 days as normal ramp-up.
+S0347,UJW2838,new_hire_onboarding,0,2026-04-08,2026-05-10,New-hire onboarding decoy: gradually broadening Engineering access over 33 days as normal ramp-up.
+S0342,XVC0594,new_hire_onboarding,0,2026-04-10,2026-05-14,New-hire onboarding decoy: gradually broadening IT access over 35 days as normal ramp-up.
+S0329,BDA7532,new_hire_onboarding,0,2026-04-11,2026-05-09,New-hire onboarding decoy: gradually broadening IT access over 29 days as normal ramp-up.
+S0327,MGY2196,new_hire_onboarding,0,2026-04-13,2026-05-10,New-hire onboarding decoy: gradually broadening Engineering access over 28 days as normal ramp-up.
+S0336,VZM3725,new_hire_onboarding,0,2026-04-13,2026-05-13,New-hire onboarding decoy: gradually broadening IT access over 31 days as normal ramp-up.
+S0333,HLH7567,new_hire_onboarding,0,2026-04-14,2026-05-17,New-hire onboarding decoy: gradually broadening DevOps access over 34 days as normal ramp-up.
+S0346,VYZ7165,new_hire_onboarding,0,2026-04-21,2026-05-23,New-hire onboarding decoy: gradually broadening Engineering access over 33 days as normal ramp-up.
+S0328,JVL5883,new_hire_onboarding,0,2026-04-25,2026-05-26,New-hire onboarding decoy: gradually broadening Finance access over 32 days as normal ramp-up.
+S0335,CXT3659,new_hire_onboarding,0,2026-04-26,2026-05-30,New-hire onboarding decoy: gradually broadening IT access over 35 days as normal ramp-up.
+S0338,DZG4068,new_hire_onboarding,0,2026-04-26,2026-05-23,New-hire onboarding decoy: gradually broadening Support access over 28 days as normal ramp-up.
+S0332,AHP2632,new_hire_onboarding,0,2026-04-28,2026-05-29,New-hire onboarding decoy: gradually broadening DevOps access over 32 days as normal ramp-up.
+S0364,RNP3279,new_hire_onboarding,0,2026-04-29,2026-06-01,New-hire onboarding decoy: gradually broadening DevOps access over 34 days as normal ramp-up.
+S0345,YAW5851,new_hire_onboarding,0,2026-05-04,2026-06-06,New-hire onboarding decoy: gradually broadening Sales access over 34 days as normal ramp-up.
+S0359,GNA5070,new_hire_onboarding,0,2026-05-04,2026-05-28,New-hire onboarding decoy: gradually broadening Sales access over 25 days as normal ramp-up.
+S0360,KHF6510,new_hire_onboarding,0,2026-05-07,2026-06-09,New-hire onboarding decoy: gradually broadening Finance access over 34 days as normal ramp-up.
+S0358,DTR1676,new_hire_onboarding,0,2026-05-12,2026-06-12,New-hire onboarding decoy: gradually broadening Engineering access over 32 days as normal ramp-up.
+S0334,LFR9724,new_hire_onboarding,0,2026-05-16,2026-06-15,New-hire onboarding decoy: gradually broadening DevOps access over 31 days as normal ramp-up.
+S0351,PHK3119,new_hire_onboarding,0,2026-05-28,2026-06-26,New-hire onboarding decoy: gradually broadening Support access over 30 days as normal ramp-up.
+S0323,MRB9312,new_hire_onboarding,0,2026-05-30,2026-06-28,New-hire onboarding decoy: gradually broadening HR access over 30 days as normal ramp-up.
+S0361,ZWD7442,new_hire_onboarding,0,2026-05-31,2026-06-29,New-hire onboarding decoy: gradually broadening DevOps access over 30 days as normal ramp-up.
+S0331,RVG2870,new_hire_onboarding,0,2026-06-01,2026-06-30,New-hire onboarding decoy: gradually broadening Finance access over 30 days as normal ramp-up.
+S0229,KVS9522,on_call_night_work,0,2026-02-15,2026-03-18,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0200,GTZ0192,on_call_night_work,0,2026-02-16,2026-03-10,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0212,LHD4579,on_call_night_work,0,2026-02-19,2026-03-25,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0194,JLN5393,on_call_night_work,0,2026-02-23,2026-03-28,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0196,QVG8689,on_call_night_work,0,2026-02-23,2026-03-17,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0208,KYD3626,on_call_night_work,0,2026-02-23,2026-03-27,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0215,YFK8135,on_call_night_work,0,2026-02-24,2026-03-23,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0228,PKA7047,on_call_night_work,0,2026-02-24,2026-03-18,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0218,MBR7933,on_call_night_work,0,2026-02-27,2026-03-30,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0225,JRM5199,on_call_night_work,0,2026-03-03,2026-03-29,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0202,MPG6197,on_call_night_work,0,2026-03-04,2026-03-24,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0210,FPV8534,on_call_night_work,0,2026-03-10,2026-04-02,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0222,DHH4426,on_call_night_work,0,2026-03-10,2026-03-30,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0209,LXG5367,on_call_night_work,0,2026-03-12,2026-04-08,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0235,EDY8122,on_call_night_work,0,2026-03-12,2026-04-13,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0204,WYG9423,on_call_night_work,0,2026-03-15,2026-04-17,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0219,ACZ8154,on_call_night_work,0,2026-03-19,2026-04-22,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0221,QKT5936,on_call_night_work,0,2026-03-23,2026-04-12,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0230,HUD1777,on_call_night_work,0,2026-03-27,2026-04-23,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0217,JJM7250,on_call_night_work,0,2026-03-30,2026-04-28,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0211,BXU0879,on_call_night_work,0,2026-03-31,2026-04-27,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0201,XMP7066,on_call_night_work,0,2026-04-06,2026-05-08,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0233,PLD6480,on_call_night_work,0,2026-04-14,2026-05-13,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0214,VWK1858,on_call_night_work,0,2026-04-17,2026-05-06,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0199,KPB4149,on_call_night_work,0,2026-04-20,2026-05-12,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0205,TZQ9935,on_call_night_work,0,2026-04-20,2026-05-19,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0232,UGN5077,on_call_night_work,0,2026-04-20,2026-05-15,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0224,JGK6296,on_call_night_work,0,2026-04-28,2026-05-30,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0234,KPJ6277,on_call_night_work,0,2026-04-29,2026-05-29,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0231,URE3093,on_call_night_work,0,2026-04-30,2026-05-29,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0198,PYP8182,on_call_night_work,0,2026-05-05,2026-06-02,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0220,CLU4292,on_call_night_work,0,2026-05-08,2026-06-05,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0193,SUQ8029,on_call_night_work,0,2026-05-09,2026-05-29,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0227,WXD2117,on_call_night_work,0,2026-05-09,2026-05-30,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0195,SDK3028,on_call_night_work,0,2026-05-10,2026-06-07,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0226,PMJ2575,on_call_night_work,0,2026-05-16,2026-06-15,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0197,VCL2588,on_call_night_work,0,2026-05-21,2026-06-22,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0213,CME8175,on_call_night_work,0,2026-05-23,2026-06-25,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0203,EWT2292,on_call_night_work,0,2026-05-27,2026-06-22,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0206,UKD6455,on_call_night_work,0,2026-06-01,2026-06-28,"On-call night-work decoy: legitimate off-hours activity on 8 night(s), normal files/sensitivity."
+S0223,QGK7077,on_call_night_work,0,2026-06-01,2026-06-24,"On-call night-work decoy: legitimate off-hours activity on 5 night(s), normal files/sensitivity."
+S0207,TZU4501,on_call_night_work,0,2026-06-09,2026-06-29,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0216,GQH7330,on_call_night_work,0,2026-06-09,2026-06-28,"On-call night-work decoy: legitimate off-hours activity on 3 night(s), normal files/sensitivity."
+S0260,SLW4036,quarter_close_spike,0,2026-02-17,2026-02-25,Quarter-close volume spike decoy: file activity roughly 4x baseline over 9 days.
+S0258,XQW0837,quarter_close_spike,0,2026-02-20,2026-02-27,Quarter-close volume spike decoy: file activity roughly 2x baseline over 8 days.
+S0238,FWE2981,quarter_close_spike,0,2026-02-27,2026-03-07,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0249,XBY3937,quarter_close_spike,0,2026-03-01,2026-03-09,Quarter-close volume spike decoy: file activity roughly 2x baseline over 9 days.
+S0256,WJJ3459,quarter_close_spike,0,2026-03-03,2026-03-08,Quarter-close volume spike decoy: file activity roughly 3x baseline over 6 days.
+S0277,RAV9544,quarter_close_spike,0,2026-03-07,2026-03-15,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0271,APF7818,quarter_close_spike,0,2026-03-08,2026-03-12,Quarter-close volume spike decoy: file activity roughly 3x baseline over 5 days.
+S0273,ASH2177,quarter_close_spike,0,2026-03-10,2026-03-19,Quarter-close volume spike decoy: file activity roughly 2x baseline over 10 days.
+S0267,ZAD3041,quarter_close_spike,0,2026-03-12,2026-03-20,Quarter-close volume spike decoy: file activity roughly 2x baseline over 9 days.
+S0242,SYG1392,quarter_close_spike,0,2026-03-14,2026-03-20,Quarter-close volume spike decoy: file activity roughly 4x baseline over 7 days.
+S0263,PZE6660,quarter_close_spike,0,2026-03-16,2026-03-21,Quarter-close volume spike decoy: file activity roughly 4x baseline over 6 days.
+S0275,KLZ7303,quarter_close_spike,0,2026-03-16,2026-03-21,Quarter-close volume spike decoy: file activity roughly 4x baseline over 6 days.
+S0255,PPH2089,quarter_close_spike,0,2026-03-20,2026-03-24,Quarter-close volume spike decoy: file activity roughly 2x baseline over 5 days.
+S0259,ZVF2710,quarter_close_spike,0,2026-03-20,2026-03-24,Quarter-close volume spike decoy: file activity roughly 3x baseline over 5 days.
+S0252,MXP4447,quarter_close_spike,0,2026-03-21,2026-03-28,Quarter-close volume spike decoy: file activity roughly 2x baseline over 8 days.
+S0254,ZVB8376,quarter_close_spike,0,2026-03-24,2026-03-31,Quarter-close volume spike decoy: file activity roughly 4x baseline over 8 days.
+S0269,LZY0366,quarter_close_spike,0,2026-03-24,2026-03-29,Quarter-close volume spike decoy: file activity roughly 4x baseline over 6 days.
+S0245,PVP1024,quarter_close_spike,0,2026-03-25,2026-04-02,Quarter-close volume spike decoy: file activity roughly 4x baseline over 9 days.
+S0266,RBA1609,quarter_close_spike,0,2026-03-27,2026-04-01,Quarter-close volume spike decoy: file activity roughly 4x baseline over 6 days.
+S0262,TFG1591,quarter_close_spike,0,2026-03-28,2026-04-05,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0247,WLX3952,quarter_close_spike,0,2026-04-04,2026-04-12,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0248,EWF9587,quarter_close_spike,0,2026-04-16,2026-04-25,Quarter-close volume spike decoy: file activity roughly 4x baseline over 10 days.
+S0251,SYZ4998,quarter_close_spike,0,2026-04-16,2026-04-25,Quarter-close volume spike decoy: file activity roughly 4x baseline over 10 days.
+S0272,VVR8997,quarter_close_spike,0,2026-04-20,2026-04-28,Quarter-close volume spike decoy: file activity roughly 4x baseline over 9 days.
+S0237,RSQ5606,quarter_close_spike,0,2026-04-23,2026-05-02,Quarter-close volume spike decoy: file activity roughly 2x baseline over 10 days.
+S0276,PWX3110,quarter_close_spike,0,2026-04-28,2026-05-07,Quarter-close volume spike decoy: file activity roughly 2x baseline over 10 days.
+S0240,UML4272,quarter_close_spike,0,2026-05-05,2026-05-09,Quarter-close volume spike decoy: file activity roughly 2x baseline over 5 days.
+S0265,PFZ1171,quarter_close_spike,0,2026-05-07,2026-05-13,Quarter-close volume spike decoy: file activity roughly 3x baseline over 7 days.
+S0246,FPS7859,quarter_close_spike,0,2026-05-10,2026-05-17,Quarter-close volume spike decoy: file activity roughly 2x baseline over 8 days.
+S0239,FXM5258,quarter_close_spike,0,2026-05-11,2026-05-18,Quarter-close volume spike decoy: file activity roughly 4x baseline over 8 days.
+S0257,WBQ6532,quarter_close_spike,0,2026-05-22,2026-05-26,Quarter-close volume spike decoy: file activity roughly 4x baseline over 5 days.
+S0250,RWL2205,quarter_close_spike,0,2026-05-24,2026-06-01,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0270,DNM0765,quarter_close_spike,0,2026-05-24,2026-05-28,Quarter-close volume spike decoy: file activity roughly 2x baseline over 5 days.
+S0236,BHW7050,quarter_close_spike,0,2026-05-29,2026-06-07,Quarter-close volume spike decoy: file activity roughly 4x baseline over 10 days.
+S0261,TYS0561,quarter_close_spike,0,2026-06-01,2026-06-08,Quarter-close volume spike decoy: file activity roughly 2x baseline over 8 days.
+S0241,FQD7162,quarter_close_spike,0,2026-06-03,2026-06-08,Quarter-close volume spike decoy: file activity roughly 3x baseline over 6 days.
+S0243,ZMX3445,quarter_close_spike,0,2026-06-03,2026-06-10,Quarter-close volume spike decoy: file activity roughly 2x baseline over 8 days.
+S0278,KSS9566,quarter_close_spike,0,2026-06-12,2026-06-16,Quarter-close volume spike decoy: file activity roughly 4x baseline over 5 days.
+S0244,XBD0169,quarter_close_spike,0,2026-06-15,2026-06-23,Quarter-close volume spike decoy: file activity roughly 3x baseline over 9 days.
+S0264,VHU4170,quarter_close_spike,0,2026-06-15,2026-06-21,Quarter-close volume spike decoy: file activity roughly 2x baseline over 7 days.
+S0268,VXJ5240,quarter_close_spike,0,2026-06-15,2026-06-22,Quarter-close volume spike decoy: file activity roughly 3x baseline over 8 days.
+S0274,WMF0666,quarter_close_spike,0,2026-06-15,2026-06-21,Quarter-close volume spike decoy: file activity roughly 3x baseline over 7 days.
+S0253,FSK9241,quarter_close_spike,0,2026-06-20,2026-06-26,Quarter-close volume spike decoy: file activity roughly 3x baseline over 7 days.
+S0448,SCA9486,remote_relocation,0,2026-02-16,2026-07-03,Remote relocation decoy: user permanently relocates to US from day 42 onward.
+S0434,HXH6707,remote_relocation,0,2026-02-19,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 45 onward.
+S0435,RKP1272,remote_relocation,0,2026-02-22,2026-07-03,Remote relocation decoy: user permanently relocates to US from day 48 onward.
+S0443,JVA7931,remote_relocation,0,2026-02-25,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 51 onward.
+S0408,PYB7646,remote_relocation,0,2026-02-27,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 53 onward.
+S0442,GQM3009,remote_relocation,0,2026-03-03,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 57 onward.
+S0423,VLE2985,remote_relocation,0,2026-03-04,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 58 onward.
+S0438,JWY4263,remote_relocation,0,2026-03-06,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 60 onward.
+S0429,UUS3207,remote_relocation,0,2026-03-12,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 66 onward.
+S0433,QDT9172,remote_relocation,0,2026-03-14,2026-07-03,Remote relocation decoy: user permanently relocates to US from day 68 onward.
+S0422,JEZ2409,remote_relocation,0,2026-03-18,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 72 onward.
+S0427,FVA0221,remote_relocation,0,2026-03-18,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 72 onward.
+S0421,QEU7845,remote_relocation,0,2026-03-20,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 74 onward.
+S0439,TDM1734,remote_relocation,0,2026-03-21,2026-07-03,Remote relocation decoy: user permanently relocates to US from day 75 onward.
+S0411,RAT3363,remote_relocation,0,2026-03-22,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 76 onward.
+S0417,EGC4448,remote_relocation,0,2026-03-24,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 78 onward.
+S0440,QDE0143,remote_relocation,0,2026-03-24,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 78 onward.
+S0445,UEY0965,remote_relocation,0,2026-03-24,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 78 onward.
+S0418,HUW0385,remote_relocation,0,2026-03-25,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 79 onward.
+S0426,XHV9567,remote_relocation,0,2026-03-26,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 80 onward.
+S0436,FRV1809,remote_relocation,0,2026-04-07,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 92 onward.
+S0430,TPG1817,remote_relocation,0,2026-04-13,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 98 onward.
+S0415,YDR6958,remote_relocation,0,2026-04-15,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 100 onward.
+S0431,SUF2908,remote_relocation,0,2026-04-15,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 100 onward.
+S0409,NVQ5269,remote_relocation,0,2026-04-23,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 108 onward.
+S0419,HNP8722,remote_relocation,0,2026-04-23,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 108 onward.
+S0410,HKB6535,remote_relocation,0,2026-04-24,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 109 onward.
+S0414,TRG3333,remote_relocation,0,2026-04-24,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 109 onward.
+S0420,EYN3867,remote_relocation,0,2026-04-28,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 113 onward.
+S0424,PXN7264,remote_relocation,0,2026-05-02,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 117 onward.
+S0425,RNS1506,remote_relocation,0,2026-05-10,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 125 onward.
+S0437,WDQ5874,remote_relocation,0,2026-05-13,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 128 onward.
+S0432,NBE8069,remote_relocation,0,2026-05-17,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 132 onward.
+S0449,GNJ4718,remote_relocation,0,2026-05-17,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 132 onward.
+S0413,NRK0173,remote_relocation,0,2026-05-30,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 145 onward.
+S0412,ZAT8680,remote_relocation,0,2026-06-03,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 149 onward.
+S0444,EQJ3213,remote_relocation,0,2026-06-06,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 152 onward.
+S0416,TQL9765,remote_relocation,0,2026-06-13,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 159 onward.
+S0447,UMH4248,remote_relocation,0,2026-06-17,2026-07-03,Remote relocation decoy: user permanently relocates to IN from day 163 onward.
+S0441,JDA6078,remote_relocation,0,2026-06-25,2026-07-03,Remote relocation decoy: user permanently relocates to BR from day 171 onward.
+S0428,DTC1360,remote_relocation,0,2026-06-26,2026-07-03,Remote relocation decoy: user permanently relocates to DE from day 172 onward.
+S0446,QJE3186,remote_relocation,0,2026-06-29,2026-07-03,Remote relocation decoy: user permanently relocates to GB from day 175 onward.
+S0283,EGE2962,weekend_deadline,0,2026-02-17,2026-03-02,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0286,LLZ7844,weekend_deadline,0,2026-02-17,2026-03-01,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0299,KCF6129,weekend_deadline,0,2026-02-21,2026-03-01,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0312,NUY8872,weekend_deadline,0,2026-03-01,2026-03-13,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0302,UMH6643,weekend_deadline,0,2026-03-03,2026-03-12,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0288,SLU6811,weekend_deadline,0,2026-03-05,2026-03-15,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0304,JHU2260,weekend_deadline,0,2026-03-12,2026-03-21,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0285,PXB7300,weekend_deadline,0,2026-03-15,2026-03-27,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0310,TUG1929,weekend_deadline,0,2026-03-18,2026-03-30,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0300,CFV6297,weekend_deadline,0,2026-03-19,2026-03-28,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0308,UJU1283,weekend_deadline,0,2026-03-23,2026-04-05,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0287,KZM4130,weekend_deadline,0,2026-03-27,2026-04-03,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0305,RQX2265,weekend_deadline,0,2026-03-28,2026-04-10,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0321,BKQ9760,weekend_deadline,0,2026-03-28,2026-04-10,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0292,APW9990,weekend_deadline,0,2026-03-31,2026-04-11,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0281,DTY9614,weekend_deadline,0,2026-04-02,2026-04-11,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0284,KSM1848,weekend_deadline,0,2026-04-02,2026-04-08,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0291,GDJ5184,weekend_deadline,0,2026-04-02,2026-04-15,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0289,KPF0729,weekend_deadline,0,2026-04-09,2026-04-17,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0295,XVL9516,weekend_deadline,0,2026-04-14,2026-04-22,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0297,GRQ2954,weekend_deadline,0,2026-04-21,2026-05-02,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0280,JBQ2200,weekend_deadline,0,2026-04-23,2026-05-02,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0317,VBX6372,weekend_deadline,0,2026-04-25,2026-05-08,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0320,GUM8655,weekend_deadline,0,2026-04-25,2026-05-03,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0294,JMM1620,weekend_deadline,0,2026-04-28,2026-05-10,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0316,ZJG3303,weekend_deadline,0,2026-04-28,2026-05-04,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0319,WBH1128,weekend_deadline,0,2026-05-02,2026-05-12,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0318,NTR2952,weekend_deadline,0,2026-05-04,2026-05-11,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0303,DXZ1860,weekend_deadline,0,2026-05-08,2026-05-18,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0290,XEP1569,weekend_deadline,0,2026-05-11,2026-05-22,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0298,GCQ7162,weekend_deadline,0,2026-05-14,2026-05-22,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0306,QBC9951,weekend_deadline,0,2026-05-25,2026-06-01,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0293,URS5582,weekend_deadline,0,2026-05-29,2026-06-04,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0311,HDT4060,weekend_deadline,0,2026-05-31,2026-06-11,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0279,LML9355,weekend_deadline,0,2026-06-01,2026-06-13,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0314,PEV4917,weekend_deadline,0,2026-06-02,2026-06-14,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0307,ETS0307,weekend_deadline,0,2026-06-06,2026-06-12,"Weekend deadline decoy: extra weekend sessions on 2 weekend day(s), normal working set."
+S0282,KZS8027,weekend_deadline,0,2026-06-14,2026-06-23,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
+S0309,AGA7372,weekend_deadline,0,2026-06-17,2026-06-28,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0315,RZM7542,weekend_deadline,0,2026-06-17,2026-06-28,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0296,FQR7082,weekend_deadline,0,2026-06-18,2026-06-30,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0301,SFX9426,weekend_deadline,0,2026-06-19,2026-06-28,"Weekend deadline decoy: extra weekend sessions on 4 weekend day(s), normal working set."
+S0313,WLN4398,weekend_deadline,0,2026-06-21,2026-06-29,"Weekend deadline decoy: extra weekend sessions on 3 weekend day(s), normal working set."
