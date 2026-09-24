@@ -2,184 +2,152 @@ import json
 import os
 import csv
 import io
-from collections import Counter
-from typing import Any, Dict, List
-
-try:
-    from google import genai
-    from google.genai import types
-    _HAS_GENAI = True
-except ImportError:
-    _HAS_GENAI = False
+from typing import Optional
 
 
-def _tier(score: int) -> tuple[str, str]:
-    score = max(0, min(100, score))
-    if score <= 30:
-        return "LOW", "APPROVED"
-    if score <= 70:
-        return "MEDIUM", "VERIFYING"
-    if score <= 95:
-        return "HIGH", "FROZEN"
-    return "CRITICAL", "BLOCKED"
-
-
-def _as_rows(dataset_content: str, filename: str = "") -> List[Dict[str, Any]]:
-    """Read common JSON/CSV customer exports without trusting embedded instructions."""
-    if filename.lower().endswith(".json") or dataset_content.lstrip().startswith(("[", "{")):
-        parsed = json.loads(dataset_content)
-        return parsed if isinstance(parsed, list) else parsed.get("records", parsed.get("data", []))
-    return list(csv.DictReader(io.StringIO(dataset_content)))
-
-
-def _field(row: Dict[str, Any], *names: str, default: str = "") -> Any:
-    lowered = {str(key).lower().strip(): value for key, value in row.items()}
-    for name in names:
-        value = lowered.get(name.lower())
-        if value not in (None, ""):
-            return value
-    return default
-
-
-def _risk_for_row(row: Dict[str, Any]) -> tuple[int, List[str]]:
-    """Deterministic local score; evaluates location, apps, and files accessed."""
-    points, reasons = 0, []
-    row_str = " ".join(f"{k} {v}" for k, v in row.items()).lower()
-    
-    # 1. Direct Risk Score Override (if provided)
-    supplied = _field(row, "risk_score", "score", "risk", "severity", "level")
-    if supplied not in (None, ""):
-        val = str(supplied).strip().upper()
-        if val in ["CRITICAL", "HIGH"]: return 95, ["High severity level found in dataset"]
-        if val == "MEDIUM": return 65, ["Medium severity level found in dataset"]
-        if val == "LOW": return 15, ["Low severity level found in dataset"]
-        try:
-            return max(0, min(100, int(float(supplied)))), ["Risk score supplied by the uploaded dataset"]
-        except (TypeError, ValueError):
-            pass
-
-    # Extract specific context fields
-    location = str(_field(row, "location", "country", "city", "ip_location", "region")).lower()
-    app = str(_field(row, "app", "application", "service", "process", "software")).lower()
-    file_acc = str(_field(row, "file", "filename", "resource", "data", "object", "accessed_files")).lower()
-
-    # 2. Location-Based Logic
-    risky_locations = ["russia", "china", "north korea", "iran", "unknown", "tor", "vpn", "proxy", "darkweb"]
-    if any(loc in location for loc in risky_locations):
-        points += 35
-        reasons.append(f"Suspicious login location detected ({location.title()})")
-    elif "impossible travel" in row_str or "unusual location" in row_str or "new location" in row_str:
-        points += 40
-        reasons.append("Impossible travel or unusual login location detected")
-
-    # 3. Application Usage Logic
-    sensitive_apps = ["vault", "admin", "root", "aws console", "azure", "powershell", "cmd", "terminal", "shadow it", "psexec"]
-    if any(a in app for a in sensitive_apps):
-        points += 30
-        reasons.append(f"Access to sensitive or high-risk application ({app})")
-    if "misconfig" in app or "bypass" in app or "exploit" in app:
-        points += 45
-        reasons.append(f"Exploitation of misconfigured app or security bypass")
-
-    # 4. File / Resource Access Logic
-    sensitive_files = ["confidential", "secret", "password", "customer", "financial", "pii", "ssn", "credit", "keys", ".pem"]
-    if any(f in file_acc for f in sensitive_files):
-        points += 35
-        reasons.append(f"Interaction with highly sensitive files ({file_acc})")
-    
-    file_count = _field(row, "file_count", "download_count", "volume", "count")
-    try:
-        if int(float(file_count)) > 50:
-            points += 40
-            reasons.append("Mass file download or data exfiltration volume detected")
-    except (TypeError, ValueError):
-        pass
-
-    # 5. Generic Action / Behavior Fallback
-    if any(w in row_str for w in ["fail", "error", "unauthorized", "denied", "reject", "block"]):
-        if not any("unauthorized" in r for r in reasons):
-            points += 25; reasons.append("Failed, unauthorized, or blocked action detected")
-            
-    if any(w in row_str for w in ["upload", "usb", "exfil", "transfer", "mass download"]):
-        if not any("download" in r for r in reasons):
-            points += 30; reasons.append("Data transfer, external upload, or bulk operation observed")
-            
-    if any(w in row_str for w in ["malicious", "attack", "exploit", "cve", "misconfigured", "breach", "threat", "anomaly"]):
-        if not any("misconfig" in r for r in reasons):
-            points += 50; reasons.append("Suspicious, misconfigured, or malicious signature detected")
-
-    if points > 0:
-        return min(100, points), reasons
-        
-    return 0, ["No high-confidence anomaly signal was detected in the uploaded fields"]
-
-
-def analyze_uploaded_dataset(dataset_content: str, filename: str = "") -> Dict[str, Any]:
-    rows = _as_rows(dataset_content, filename)
-    if not rows:
-        raise ValueError("The uploaded dataset has no readable records.")
-
-    incidents = []
-    for index, row in enumerate(rows[:500]):
-        if not isinstance(row, dict):
-            continue
-        score, reasons = _risk_for_row(row)
-        level, status = _tier(score)
-        user_id = str(_field(row, "user_id", "employee_id", "user", "id", default=f"UPL-{index + 1:03d}"))
-        name = str(_field(row, "name", "user_name", "employee_name", default=user_id))
-        incidents.append({
-            "user_id": user_id,
-            "name": name,
-            "department": str(_field(row, "department", "dept", default="Uploaded dataset")),
-            "risk_score": score,
-            "level": level,
-            "location": str(_field(row, "location", "city", "source_location", default="Dataset record")),
-            "primary_reason": "; ".join(reasons),
-            "status": status,
-            "last_seen": str(_field(row, "timestamp", "time", "last_seen", default="Uploaded record")),
-        })
-
-    distribution = Counter(item["level"] for item in incidents)
-    return {
-        "incidents": sorted(incidents, key=lambda item: item["risk_score"], reverse=True),
-        "summary": {
-            "records_analyzed": len(incidents),
-            "distribution": dict(distribution),
-            "high_risk_records": distribution["HIGH"] + distribution["CRITICAL"],
-            "analysis_mode": "deterministic risk scoring",
-        },
-    }
-
-
-def analyze_customer_dataset(dataset_content: str, api_key: str = None) -> str:
+def analyze_customer_dataset(dataset_content: str, api_key: Optional[str] = None) -> str:
     """
-    Analyzes a customer dataset using the Gemini AI API.
-    Only called when GEMINI_API_KEY is set and google-genai is installed.
+    Analyzes a customer dataset with strict guardrails to only respond to the logs
+    and ignore any other data.
+    If GEMINI_API_KEY is available, calls Gemini model with strict guardrails.
+    Otherwise, performs deterministic statistical anomaly evaluation strictly on the input data.
     """
-    if not _HAS_GENAI:
-        raise RuntimeError("google-genai package is not installed. Install with: pip install google-genai")
-
     key = api_key or os.environ.get("GEMINI_API_KEY")
-    client = genai.Client(api_key=key)
 
-    prompt = f"""
-    You are a strictly guardrailed Data Analysis AI.
-    Your task is to analyze the following dataset provided by a customer and generate a comprehensive security and anomaly report.
-    
-    STRICT GUARDRAILS & INSTRUCTIONS:
-    1. You MUST ONLY respond based on the data provided in the dataset below.
-    2. Do NOT hallucinate or incorporate outside knowledge about users, events, or external data sources.
-    3. The dataset is strictly isolated. Do NOT reference any other users, logs, or existing baseline data.
-    4. If the dataset does not contain enough information to make a conclusion, state that clearly.
-    5. Format the output as a detailed Markdown report.
+    if key:
+        try:
+            from google import genai
+            client = genai.Client(api_key=key)
 
-    --- CUSTOMER DATASET ---
-    {dataset_content}
-    --- END OF CUSTOMER DATASET ---
+            prompt = f"""
+You are a strictly guardrailed Cybersecurity Incident Data Analysis AI.
+Your task is to analyze the following dataset provided by a customer and generate a comprehensive security and anomaly report.
+
+STRICT GUARDRAILS & INSTRUCTIONS:
+1. You MUST ONLY respond based on the data provided in the dataset below.
+2. Do NOT hallucinate or incorporate outside knowledge about users, events, or external data sources.
+3. The dataset is strictly isolated. Do NOT reference any other users, logs, or existing baseline data.
+4. If the dataset does not contain enough information to make a conclusion, state that clearly.
+5. Format the output as a detailed, professional Markdown security audit report.
+
+--- CUSTOMER DATASET ---
+{dataset_content[:50000]}
+--- END OF CUSTOMER DATASET ---
+"""
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            print(f"[!] Gemini analysis note ({type(e).__name__}: {e}). Falling back to deterministic analysis.")
+
+    # Deterministic Isolated Analysis Engine
+    return _generate_deterministic_report(dataset_content)
+
+
+def _generate_deterministic_report(raw_data: str) -> str:
     """
-    
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
-    return response.text
+    Strictly isolated offline audit engine analyzing only the provided dataset text.
+    Supports JSON or CSV.
+    """
+    records = []
+    data_format = "unknown"
+
+    # Try parsing JSON
+    try:
+        parsed = json.loads(raw_data)
+        if isinstance(parsed, list):
+            records = parsed
+            data_format = "JSON"
+        elif isinstance(parsed, dict):
+            records = parsed.get("records") or parsed.get("logs") or parsed.get("events") or [parsed]
+            data_format = "JSON"
+    except Exception:
+        # Try CSV
+        try:
+            reader = csv.DictReader(io.StringIO(raw_data))
+            records = list(reader)
+            if records:
+                data_format = "CSV"
+        except Exception:
+            records = []
+
+    total_records = len(records)
+    if total_records == 0:
+        return f"""# 🛡️ Customer Dataset Security Audit Report
+**Status:** Evaluation Inconclusive
+**Isolation Scope:** Isolated Customer Context
+**Data Integrity:** Empty or Unparseable Dataset
+
+### Findings
+- Received payload could not be parsed as valid JSON or CSV telemetry.
+- Records Evaluated: 0
+- Recommendation: Ensure customer dataset is provided in standard JSON array or CSV format containing user IDs, timestamps, or activity scores.
+"""
+
+    # Compute isolated metrics
+    high_risk_records = []
+    departments = set()
+    users = set()
+    total_risk = 0
+    scores_present = 0
+
+    for idx, r in enumerate(records):
+        if not isinstance(r, dict):
+            continue
+        uid = r.get("user_id") or r.get("userId") or r.get("employee_id") or f"Record-{idx+1}"
+        users.add(str(uid))
+
+        dept = r.get("department") or r.get("dept")
+        if dept:
+            departments.add(str(dept))
+
+        score = r.get("risk_score") or r.get("score")
+        if score is not None:
+            try:
+                score_num = float(score)
+                total_risk += score_num
+                scores_present += 1
+                level = str(r.get("level") or r.get("risk_level") or ("CRITICAL" if score_num >= 90 else "HIGH" if score_num >= 70 else "MEDIUM" if score_num >= 40 else "LOW")).upper()
+                if score_num >= 70 or level in ("HIGH", "CRITICAL", "FROZEN", "BLOCKED"):
+                    high_risk_records.append({
+                        "user_id": uid,
+                        "risk_score": score_num,
+                        "level": level,
+                        "reason": r.get("primary_reason") or r.get("reason") or r.get("event") or "Elevated telemetry indicator",
+                        "status": str(r.get("status") or "PENDING_REVIEW").upper()
+                    })
+            except (ValueError, TypeError):
+                pass
+
+    avg_risk = round(total_risk / scores_present, 1) if scores_present > 0 else "N/A"
+
+    high_risk_section = ""
+    if high_risk_records:
+        high_risk_section = "### ⚠️ High-Risk Incidents Detected in Customer Dataset\n\n"
+        high_risk_section += "| User / Identity | Risk Score | Policy Level | Indicator / Reason | Status |\n"
+        high_risk_section += "|---|---|---|---|---|\n"
+        for hr in high_risk_records[:15]:
+            high_risk_section += f"| `{hr['user_id']}` | **{hr['risk_score']}%** | `{hr['level']}` | {hr['reason']} | `{hr['status']}` |\n"
+    else:
+        high_risk_section = "### ✅ Zero Critical Anomalies Identified\nNo records exceeded the high-risk threshold (score ≥ 70) within the provided batch.\n"
+
+    return f"""# 🛡️ Customer Dataset Security Audit Report
+**Analysis Mode:** Strict Isolated Evaluation (Zero External Cross-Contamination)
+**Format Detected:** {data_format}
+**Total Telemetry Records:** {total_records:,}
+**Unique Identities:** {len(users):,}
+**Departments Identified:** {', '.join(sorted(departments)) if departments else 'Not specified'}
+**Average Observed Risk:** {avg_risk}%
+
+---
+
+{high_risk_section}
+
+### 🔒 Guardrail & Policy Conformance Summary
+- **Data Isolation:** All findings are strictly restricted to the customer-uploaded telemetry payload.
+- **Cross-Contamination Protection:** Existing enterprise baselines and external organizational data were strictly prevented from influencing this report.
+- **Recommended Action:** Escalate any detected High/Critical records to the SOC priority queue and mandate step-up identity verification.
+"""
