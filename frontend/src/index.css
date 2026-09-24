@@ -264,3 +264,44 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Shimmer Animation ─── */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ─── Pulse Glow for Active Elements ─── */
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.2); }
+  50% { box-shadow: 0 0 20px 4px rgba(34, 211, 238, 0.1); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* ─── Data-Dense Table Styling ─── */
+
+.data-table tbody tr {
+  border-bottom: 1px solid rgba(30, 41, 59, 0.3);
+}
+
+.data-table tbody tr:hover {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+/* ─── Gradient Text Utility ─── */
+
+.text-gradient-cyber {
+  background: linear-gradient(135deg, #22d3ee, #a78bfa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

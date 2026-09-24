@@ -1,6 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  safelist: [
+    { pattern: /border-(emerald|cyan|violet|amber|rose|orange)-500\/\d+/ },
+    { pattern: /bg-(emerald|cyan|violet|amber|rose|orange)-500\/\[/ },
+    { pattern: /text-(emerald|cyan|violet|amber|rose|orange)-\d+/ },
+  ],
   theme: {
     extend: {
       fontFamily: {
