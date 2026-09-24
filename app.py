@@ -30,7 +30,7 @@ from src.cert_engine import (
     DECOY_SCENARIOS,
 )
 from src.baselining import UserBehaviorProfiler
-from src.gemini_detector import ThreatDetector, UEBAAssessment
+from src.threat_detector import ThreatDetector, UEBAAssessment
 from src.prioritizer import rank_incident_queue, INVESTIGATOR_CAPACITY
 
 # ─── Page Configuration ───────────────────────────────────────────────────────
