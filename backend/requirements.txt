@@ -1,0 +1,6 @@
+google-genai>=1.0.0
+pandas>=2.2.0
+pydantic>=2.7.0
+fastapi
+uvicorn
+python-multipart

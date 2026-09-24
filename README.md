@@ -1,29 +1,52 @@
-# CyberShield —Frontend
+# Explainable Insider-Threat Behavioral Anomaly Detector (HTH-CS-07)
 
-Polished React 18 + Vite + Tailwind SOC dashboard for **Explainable Insider-Threat Anomaly Detector (HTH-CS-07)**.
+Enterprise insider threat detection platform featuring a Python/Streamlit analytics backend and a modern React/Vite SOC dashboard.
 
-## Run
+---
 
+## 📁 Repository Structure
+
+```
+HTH006CS01/
+├── frontend/             # React 18 + Vite + Tailwind CSS SOC Dashboard
+│   ├── src/              # React components, views, and styles
+│   ├── package.json      # Node.js dependencies
+│   ├── vite.config.js    # Vite configuration
+│   └── README.md         # Frontend specific setup & demo guide
+│
+├── backend/              # Python / Streamlit UEBA & Detection Engine
+│   ├── app.py            # Streamlit SOC dashboard & detection app
+│   ├── src/              # Core algorithms (baselining, cert_engine, threat_detector, prioritizer)
+│   ├── insider_threat_data/ # Enterprise dataset v2 (2,500 users, 180 days)
+│   ├── tests/            # Test suite
+│   ├── requirements.txt  # Python dependencies
+│   └── BACKEND_ANALYSIS.md # Backend architecture notes
+│
+└── README.md             # Project overview and run instructions
+```
+
+---
+
+## 🚀 Getting Started
+
+### 1. Frontend Setup (React + Vite)
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
+Runs at `http://localhost:5173`.
 
-Frontend: `http://localhost:5173`
-Backend API base: `http://localhost:8000/api`
+### 2. Backend Setup (Python + Streamlit)
+```bash
+cd backend
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+# source .venv/bin/activate
 
-## Demo flow
-
-1. Open **Operations Dashboard**.
-2. Click **Normal / EMP101** → approved access.
-3. Click **Medium / EMP205** → OTP modal opens. Use demo code `123456`.
-4. Click **High / EMP302** → session is frozen.
-5. Click **Critical / EMP928** → access is blocked.
-6. Click **Investigate** on any row → explainability drawer opens.
-7. Open **Identity Directory** to show all 35 monitored identities.
-
-If the backend is unavailable, the same simulation flow uses local demo fallbacks so the presentation remains usable.
-
-## Member 4 integration
-
-`App.jsx` owns `selectedIncident`. The built-in explainability drawer can be replaced or extended by Member 4 without changing the dashboard table.
+pip install -r requirements.txt
+streamlit run app.py
+```
+Runs at `http://localhost:8501`.
