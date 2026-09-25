@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
 import { UploadCloud, FileCheck, AlertCircle, CheckCircle2, Sparkles, X, FileText } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import api from '../api'
 
 export default function DatasetUpload({ onLoad }) {
@@ -157,46 +159,66 @@ export default function DatasetUpload({ onLoad }) {
           onClick={() => setReportOpen(false)}
         >
           <div
-            className="w-full max-w-3xl rounded-2xl border border-slate-700/60 bg-slate-900/95 p-6 shadow-2xl overflow-hidden text-slate-200"
+            className="w-full max-w-4xl rounded-2xl border border-cyan-900/50 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl overflow-hidden text-slate-200 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-cyan-400" />
-                <h2 className="text-base font-bold text-white">
-                  Dataset Security Audit
-                </h2>
+            <div className="flex items-center justify-between border-b border-cyan-900/30 pb-5 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-950 border border-cyan-800 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                  <Sparkles className="h-5 w-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white tracking-wide">
+                    Dataset Security Audit
+                  </h2>
+                  <p className="text-xs text-cyan-400/70">Automated AI Threat Analysis</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setReportOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="max-h-[65vh] overflow-y-auto pr-2 space-y-4 font-mono text-xs leading-relaxed whitespace-pre-wrap bg-slate-950/80 p-5 rounded-xl border border-slate-800/80">
-              {report}
+            <div className="flex-1 overflow-y-auto pr-4 -mr-4 custom-scrollbar">
+              <div className="prose prose-invert prose-cyan max-w-none prose-sm sm:prose-base
+                prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-cyan-50
+                prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h3:text-cyan-300
+                prose-p:text-slate-300 prose-p:leading-relaxed
+                prose-a:text-cyan-400 prose-a:no-underline hover:prose-a:underline
+                prose-strong:text-cyan-200 prose-strong:font-semibold
+                prose-code:text-cyan-300 prose-code:bg-cyan-950/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800
+                prose-ul:text-slate-300 prose-ol:text-slate-300
+                prose-li:marker:text-cyan-500
+                bg-slate-900/40 p-6 sm:p-8 rounded-2xl border border-slate-800/60 shadow-inner"
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {report}
+                </ReactMarkdown>
+              </div>
             </div>
 
-            <div className="mt-4 flex justify-end gap-3">
+            <div className="mt-6 pt-5 border-t border-cyan-900/30 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => {
                   navigator.clipboard?.writeText(report)
                   alert('Report copied to clipboard!')
                 }}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+                className="px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:border-slate-600 text-sm font-semibold text-slate-200 transition-all shadow-sm"
               >
                 Copy Report
               </button>
               <button
                 type="button"
                 onClick={() => setReportOpen(false)}
-                className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-xs font-bold text-white"
+                className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-sm font-bold text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
               >
-                Close
+                Done
               </button>
             </div>
           </div>
