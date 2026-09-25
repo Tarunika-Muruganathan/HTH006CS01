@@ -115,7 +115,7 @@ export default function DatasetUpload({ onLoad }) {
             <input
               ref={inputRef}
               type="file"
-              accept=".json,.csv,.txt,.zip"
+              accept=".json,.csv,.txt,.zip,.xls,.xlsx"
               className="hidden"
               onChange={handleFile}
             />

@@ -4,3 +4,5 @@ pydantic>=2.7.0
 fastapi
 uvicorn
 python-multipart
+
+openpyxl>=3.1.0

@@ -15,6 +15,7 @@ import os
 import re
 import zipfile
 import io
+import pandas as pd
 
 # Ensure backend root is on sys.path
 BACKEND_ROOT = Path(__file__).resolve().parent
@@ -485,16 +486,31 @@ async def analyze_dataset(file: UploadFile = File(...)):
                     if total_size > MAX_UNCOMPRESSED_SIZE:
                         raise HTTPException(status_code=400, detail="Zip file too large (Zip Bomb protection).")
                     
-                    # Extract only safe file types
+                    # Extract safe text file types
                     if file_info.filename.endswith((".csv", ".json", ".txt")):
                         extracted_bytes = zf.read(file_info)
                         text_content += extracted_bytes.decode("utf-8", errors="replace") + "\n"
+                    # Extract and parse Excel files
+                    elif file_info.filename.endswith((".xlsx", ".xls")):
+                        extracted_bytes = zf.read(file_info)
+                        try:
+                            df = pd.read_excel(io.BytesIO(extracted_bytes))
+                            text_content += df.to_csv(index=False) + "\n"
+                        except Exception as e:
+                            print(f"[!] Failed to parse Excel inside zip: {e}")
                         
             if not text_content:
-                raise HTTPException(status_code=400, detail="No valid CSV/JSON/TXT files found in the zip.")
+                raise HTTPException(status_code=400, detail="No valid CSV/JSON/TXT/XLSX files found in the zip.")
                 
         except zipfile.BadZipFile:
             raise HTTPException(status_code=400, detail="Invalid zip file.")
+    elif file.filename.endswith((".xlsx", ".xls")):
+        # Raw Excel upload
+        try:
+            df = pd.read_excel(io.BytesIO(content))
+            text_content = df.to_csv(index=False)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid Excel file: {e}")
     else:
         # Standard uncompressed file
         text_content = content.decode("utf-8", errors="replace")
