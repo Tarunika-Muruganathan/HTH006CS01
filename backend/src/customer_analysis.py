@@ -16,6 +16,14 @@ def analyze_customer_dataset(dataset_content: str, api_key: Optional[str] = None
 
     if key:
         try:
+            import re
+            
+            # --- PII MASKING (Zero-Trust Data Security) ---
+            # Mask IPv4 addresses
+            sanitized_content = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', '[MASKED_IP]', dataset_content)
+            # Mask email addresses
+            sanitized_content = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[MASKED_EMAIL]', sanitized_content)
+            
             from google import genai
             client = genai.Client(api_key=key)
 
@@ -31,7 +39,7 @@ STRICT GUARDRAILS & INSTRUCTIONS:
 5. Format the output as a detailed, professional Markdown security audit report.
 
 --- CUSTOMER DATASET ---
-{dataset_content[:50000]}
+{sanitized_content[:50000]}
 --- END OF CUSTOMER DATASET ---
 """
             response = client.models.generate_content(
