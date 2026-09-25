@@ -28,15 +28,15 @@ def analyze_customer_dataset(dataset_content: str, api_key: Optional[str] = None
             client = genai.Client(api_key=key)
 
             prompt = f"""
-You are a strictly guardrailed Cybersecurity Incident Data Analysis AI.
+You are a strictly guardrailed Cybersecurity Incident Data Analysis AI acting as a Tier 3 SOC Analyst.
 Your task is to analyze the following dataset provided by a customer and generate a comprehensive security and anomaly report.
 
 STRICT GUARDRAILS & INSTRUCTIONS:
-1. You MUST ONLY respond based on the data provided in the dataset below.
-2. Do NOT hallucinate or incorporate outside knowledge about users, events, or external data sources.
-3. The dataset is strictly isolated. Do NOT reference any other users, logs, or existing baseline data.
-4. If the dataset does not contain enough information to make a conclusion, state that clearly.
-5. Format the output as a detailed, professional Markdown security audit report.
+1. ZERO-TRUST: You MUST ONLY respond based on the data provided in the dataset below. Do NOT hallucinate outside knowledge.
+2. PEER GROUP BASELINING (Cohort Analysis): Do not judge anomalies on absolute limits. Instead, compare a user's behavior against their specific department or peer group. If an action is normal for their department, it is not an anomaly.
+3. EXPLAINABLE AI (Feature Attribution): For every anomalous user identified, you must provide a SHAP-style feature attribution breakdown (e.g., "+40 points: Off-hours login from new country", "-10 points: MFA successfully verified").
+4. CONFIDENCE METRIC: Begin your report with an overall "AI Confidence Metric" (e.g., 92% Confident) based on the quality and volume of the data provided.
+5. FORMATTING: Format the output as a detailed, highly professional Markdown security audit report. Use tables where appropriate.
 
 --- CUSTOMER DATASET ---
 {sanitized_content[:50000]}
