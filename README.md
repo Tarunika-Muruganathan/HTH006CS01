@@ -377,7 +377,7 @@ The backend exposes `/api/users/{uid}/drift` and `/api/users/{uid}/stats`, but t
 | `AUDIT_ENCRYPTION_KEY` | Optional persistent Fernet key for audit rationales. Otherwise, the backend creates/uses `backend/.audit_encryption.key`. |
 | `VITE_API_URL` | Frontend API base URL; defaults to `http://localhost:8000/api`. |
 
-The backend reads process environment variables; it does not automatically load a `.env` file. Set the Gemini key in the same terminal before starting the server:
+The FastAPI entry point calls `load_dotenv()` and reads process environment variables. For local development, you can keep server settings in `backend/.env`; on Render, configure them in the service environment. You can also set the Gemini key in the same terminal before starting the server:
 
 ```bash
 export GEMINI_API_KEY="your-server-side-key"
