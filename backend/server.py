@@ -11,6 +11,8 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import os
+import re
 
 # Ensure backend root is on sys.path
 BACKEND_ROOT = Path(__file__).resolve().parent
@@ -51,13 +53,8 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
-def startup_event():
-    """Auto-ingest the CERT v2 dataset if the DB doesn't exist yet."""
-    if not DB_PATH.exists():
-        print("⏳ Ingesting data_v2 dataset (2,500 users × 180 days). This may take a moment…")
-        ingest_data_v2()
-        print("✅ Ingestion complete!")
+# NOTE: Auto-ingestion of the CERT insider threat dataset is disabled.
+# The dashboard starts empty — only user-uploaded datasets are analyzed and displayed.
 
 
 # Lazily initialized after DB is guaranteed to exist
@@ -93,6 +90,11 @@ class AuditPayload(BaseModel):
     status: str
     justification: str
     ai_override: bool = False
+
+
+class ChatRequest(BaseModel):
+    message: str
+    incident_context: Optional[Dict[str, Any]] = None
 
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -465,9 +467,184 @@ async def analyze_dataset(file: UploadFile = File(...)):
     return {"report": report}
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+# =============================================================================
+# ROUTES - AI Chat Assistant
+# =============================================================================
+
+def _build_deterministic_response(message: str, ctx: Optional[Dict[str, Any]]) -> str:
+    """Generate a smart contextual response based on the incident and question."""
+    msg_lower = message.lower().strip()
+
+    if not ctx:
+        return (
+            "I can provide deeper analysis once you select an incident from the dashboard. "
+            "Upload a dataset and click on any flagged identity to begin investigation. "
+            "I'll then be able to explain risk scores, recommend actions, and walk you through the evidence."
+        )
+
+    uid = ctx.get("user_id", "Unknown")
+    name = ctx.get("name", "Unknown")
+    dept = ctx.get("department", "Unknown")
+    score = ctx.get("risk_score", 0)
+    level = ctx.get("level", "LOW")
+    status = ctx.get("status", "APPROVED")
+    location = ctx.get("location", "Unknown")
+    reason = ctx.get("primary_reason", "No specific anomaly recorded.")
+
+    # --- Action recommendations ---
+    if any(kw in msg_lower for kw in ["action", "should i", "what do", "recommend", "next step", "respond"]):
+        actions = {
+            "CRITICAL": (
+                f"**Immediate Actions Required for {name} ({uid}):**\n\n"
+                f"1. **BLOCK all active sessions** immediately - this is a critical-severity incident (score: {score}/100)\n"
+                f"2. **Revoke credentials** and rotate all access tokens associated with {uid}\n"
+                f"3. **Isolate the endpoint** at {location} from the network\n"
+                f"4. **Preserve forensic evidence** - capture memory dump and disk image before remediation\n"
+                f"5. **Escalate to Incident Commander** and notify {dept} department leadership\n"
+                f"6. **File a formal incident report** and begin root cause analysis\n\n"
+                f"**Key finding:** {reason}"
+            ),
+            "HIGH": (
+                f"**Recommended Actions for {name} ({uid}):**\n\n"
+                f"1. **Freeze the current session** - deny sensitive operations until cleared (score: {score}/100)\n"
+                f"2. **Initiate out-of-band identity verification** - call the user directly or use physical badge check\n"
+                f"3. **Review recent activity logs** for the past 72 hours in {dept}\n"
+                f"4. **Check for lateral movement** from {location}\n"
+                f"5. **Place on enhanced monitoring** with 15-minute review intervals\n\n"
+                f"**Key finding:** {reason}"
+            ),
+            "MEDIUM": (
+                f"**Suggested Actions for {name} ({uid}):**\n\n"
+                f"1. **Require step-up verification** - send OTP or password re-authentication (score: {score}/100)\n"
+                f"2. **Review the anomaly trigger** - {reason}\n"
+                f"3. **Compare against {dept} department peer baseline** to validate deviation\n"
+                f"4. **Monitor for escalation** over the next 24 hours\n"
+                f"5. If verified, **re-approve access** and update the behavioral baseline\n"
+            ),
+            "LOW": (
+                f"**Status for {name} ({uid}):**\n\n"
+                f"No immediate action required. Risk score is {score}/100 (LOW).\n"
+                f"Activity is consistent with the established behavioral baseline.\n"
+                f"Continue passive monitoring under standard SOC procedures."
+            ),
+        }
+        return actions.get(level, actions["LOW"])
+
+    # --- Risk score explanation ---
+    if any(kw in msg_lower for kw in ["risk", "score", "why", "flagged", "explain", "how"]):
+        severity_desc = {
+            "CRITICAL": "extremely high - immediate threat to organizational security",
+            "HIGH": "elevated - active threat indicators requiring urgent attention",
+            "MEDIUM": "moderate - behavioral anomalies detected that warrant verification",
+            "LOW": "normal - activity within expected parameters",
+        }
+        return (
+            f"**Risk Assessment for {name} ({uid}):**\n\n"
+            f"**Score:** {score}/100 ({level})\n"
+            f"**Severity:** {severity_desc.get(level, 'unknown')}\n"
+            f"**Department:** {dept}\n"
+            f"**Location:** {location}\n\n"
+            f"**Primary Detection Trigger:**\n{reason}\n\n"
+            f"**Scoring Methodology:**\n"
+            f"The risk score is computed using deterministic behavioral baselining. "
+            f"It measures the deviation magnitude from {name}'s historical activity pattern, "
+            f"weighted by resource sensitivity, temporal anomaly factors (off-hours access), "
+            f"and peer-group comparison within the {dept} department.\n\n"
+            f"**Current Policy:** {status}"
+        )
+
+    # --- Status/policy questions ---
+    if any(kw in msg_lower for kw in ["status", "policy", "approved", "blocked", "frozen", "verif"]):
+        policy_map = {
+            "APPROVED": "Access is currently **allowed**. The user is under passive behavioral monitoring.",
+            "VERIFYING": "Access is **paused** pending step-up verification (OTP or password re-entry).",
+            "FROZEN": "Session is **frozen**. All sensitive operations are temporarily denied.",
+            "BLOCKED": "Access is **fully blocked**. The session has been terminated and escalated to SOC.",
+        }
+        return (
+            f"**Policy Status for {name} ({uid}):**\n\n"
+            f"**Current Status:** {status}\n"
+            f"{policy_map.get(status, 'Unknown policy state.')}\n\n"
+            f"**Risk Level:** {level} (Score: {score}/100)\n"
+            f"**Trigger:** {reason}"
+        )
+
+    # --- General / catch-all ---
+    return (
+        f"**Incident Summary for {name} ({uid}):**\n\n"
+        f"- **Risk Score:** {score}/100 ({level})\n"
+        f"- **Status:** {status}\n"
+        f"- **Department:** {dept}\n"
+        f"- **Location:** {location}\n"
+        f"- **Primary Finding:** {reason}\n\n"
+        f"You can ask me to:\n"
+        f"- *\"What actions should I take?\"* - Get specific response recommendations\n"
+        f"- *\"Explain the risk score\"* - Understand the scoring methodology\n"
+        f"- *\"What is the current policy?\"* - Review enforcement decisions"
+    )
+
+
+@app.post("/api/ai/chat")
+async def ai_chat(request: ChatRequest):
+    """
+    AI-powered chat assistant for incident investigation.
+    Uses Gemini API if GEMINI_API_KEY is available, otherwise falls back
+    to intelligent deterministic responses based on incident context.
+    """
+    message = request.message
+    ctx = request.incident_context
+    gemini_key = os.environ.get("GEMINI_API_KEY")
+
+    if gemini_key:
+        try:
+            from google import genai
+            client = genai.Client(api_key=gemini_key)
+
+            context_block = ""
+            if ctx:
+                context_block = f"""
+--- INCIDENT CONTEXT ---
+User ID: {ctx.get('user_id', 'N/A')}
+Name: {ctx.get('name', 'N/A')}
+Department: {ctx.get('department', 'N/A')}
+Risk Score: {ctx.get('risk_score', 'N/A')}/100
+Risk Level: {ctx.get('level', 'N/A')}
+Status: {ctx.get('status', 'N/A')}
+Location: {ctx.get('location', 'N/A')}
+Primary Reason: {ctx.get('primary_reason', 'N/A')}
+--- END CONTEXT ---
+"""
+
+            prompt = f"""You are a SOC (Security Operations Center) AI analyst assistant for the VectrGuard UEBA platform.
+You help security analysts investigate insider threat incidents.
+
+Rules:
+1. Only respond based on the incident context provided. Do not hallucinate external data.
+2. Be concise, professional, and actionable.
+3. Format responses using Markdown (bold, bullet points, etc.).
+4. If no incident context is provided, ask the user to select an incident first.
+
+{context_block}
+
+Analyst question: {message}"""
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+            if response and response.text:
+                return {"response": response.text}
+        except Exception as e:
+            print(f"[!] Gemini chat error ({type(e).__name__}: {e}). Using deterministic fallback.")
+
+    # Deterministic fallback
+    reply = _build_deterministic_response(message, ctx)
+    return {"response": reply}
+
+
+# =============================================================================
 # Entrypoint
-# ═════════════════════════════════════════════════════════════════════════════
+# =============================================================================
 
 if __name__ == "__main__":
     import uvicorn

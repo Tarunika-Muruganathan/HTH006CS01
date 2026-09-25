@@ -26,7 +26,7 @@ import RejectionPanel from './components/RejectionPanel'
 import AIAssistant from './components/AIAssistant'
 import DashboardView from './views/DashboardView'
 import UsersView from './views/UsersView'
-import { demoIncidents, monitoredUsers } from './data'
+import { demoIncidents } from './data'
 
 const normalizeIncident = (incident = {}) => ({
   user_id: incident.user_id ?? incident.userId ?? incident.employee_id ?? 'UNKNOWN',
@@ -97,10 +97,7 @@ export default function App() {
     showNotice(`${verifiedIncident.user_id}: identity verified · access approved`, 'LOW')
   }
 
-  const users = useMemo(() => monitoredUsers.map((user) => {
-    const live = incidents.find((incident) => incident.user_id === user.user_id)
-    return live ? { ...user, ...live } : user
-  }), [incidents])
+  const users = useMemo(() => incidents, [incidents])
 
   const syncLabel = lastSync
     ? lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
