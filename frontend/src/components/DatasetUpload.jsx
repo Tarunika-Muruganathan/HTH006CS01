@@ -79,9 +79,7 @@ export default function DatasetUpload({ onLoad }) {
       formData.append('file', file)
 
       try {
-        const res = await api.post('/dataset/analyze', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
+        const res = await api.post('/dataset/analyze', formData)
         if (res.data?.report) {
           setReport(res.data.report)
         }
