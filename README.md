@@ -4,11 +4,13 @@
 
 **Live dashboard:** [Open VectrGuard](https://vectrguard-dashboard.vercel.app/)
 
+**Hosted on:** Vercel for the React frontend · Render for the FastAPI backend.
+
 VectrGuard is a security operations dashboard built with **React and FastAPI**. Analysts can upload customer telemetry, read a security audit report, inspect identity risk and policy states, and ask an assistant about a selected incident.
 
 This README describes the implementation on **`main`**. The backend entry point is [`backend/server.py`](backend/server.py); Streamlit is no longer required.
 
-**Quick navigation:** [Setup](#run-locally) · [Dataset formats](#customer-dataset-format-and-outputs) · [Data visualizations](#data-visualization-guide) · [Gemini configuration](#gemini-and-audit-configuration) · [API reference](#rest-api-reference) · [Verification](#build-and-verification)
+**Quick navigation:** [Cloud deployment](#cloud-deployment-vercel--render) · [Local setup](#run-locally) · [Dataset formats](#customer-dataset-format-and-outputs) · [Data visualizations](#data-visualization-guide) · [Gemini configuration](#gemini-and-audit-configuration) · [API reference](#rest-api-reference) · [Verification](#build-and-verification)
 
 ## Features
 
@@ -52,6 +54,90 @@ HTH006CS01/
 │   └── package.json
 └── README.md
 ```
+
+## Cloud deployment: Vercel + Render
+
+The project frontend is deployed on **Vercel**, and the Python FastAPI backend is deployed on **Render**. Open the Vercel dashboard to use the application; the frontend's Axios client connects to the backend URL configured through `VITE_API_URL`.
+
+| Component | Hosting | Responsibility | Address / configuration |
+|---|---|---|---|
+| React + Vite frontend | **Vercel** | Serves the dashboard application, upload interface, charts, report viewer, and assistant UI. | [vectrguard-dashboard.vercel.app](https://vectrguard-dashboard.vercel.app/) |
+| FastAPI backend | **Render** | Processes uploaded datasets, generates reports, handles assistant requests, and exposes enterprise/demo API routes. | Render service origin followed by `/api`, configured as `VITE_API_URL` on Vercel. |
+| Gemini integration | External service called by the backend | Optional report generation and contextual assistant responses. | `GEMINI_API_KEY` stays in the Render backend environment. |
+
+### Deployment architecture graph
+
+```mermaid
+flowchart LR
+    Browser["Analyst's browser"]
+
+    subgraph Vercel["Vercel - frontend hosting"]
+        UI["React + Vite application"]
+    end
+
+    subgraph Render["Render - backend hosting"]
+        API["FastAPI REST API"]
+        Reports["Customer report analysis"]
+        Chat["Incident assistant"]
+        Enterprise["Enterprise demonstration engine"]
+        DB[("SQLite demo data and audit records")]
+        API --> Reports
+        API --> Chat
+        API --> Enterprise
+        Enterprise --> DB
+    end
+
+    Gemini["Gemini API - optional"]
+    Browser -->|"HTTPS: load dashboard"| UI
+    UI -->|"HTML, CSS, JavaScript"| Browser
+    Browser -->|"HTTPS: API requests"| API
+    API -->|"JSON: report, preview, responses"| Browser
+    Reports -.->|"When configured"| Gemini
+    Chat -.->|"When configured"| Gemini
+```
+
+Vercel serves the frontend assets. API calls originate from the browser and go to the configured Render backend. Customer uploads follow the report-analysis path; they are not automatically inserted into the separate enterprise SQLite database. The diagram shows application responsibilities, not a claim of persistent cloud storage or live infrastructure monitoring.
+
+### Upload-to-report sequence graph
+
+```mermaid
+sequenceDiagram
+    actor Analyst
+    participant UI as React UI in browser (served by Vercel)
+    participant API as FastAPI backend on Render
+    participant AI as Gemini API (optional)
+
+    Analyst->>UI: Select a customer dataset
+    Note over UI: Text files may show a local preview first
+    UI->>API: POST /api/dataset/analyze (multipart file)
+    API->>API: Decode text or read ZIP / Excel content
+    alt Gemini is configured and the call succeeds
+        API->>API: Mask IPv4 and email addresses in report input
+        API->>AI: Request analysis of sanitized dataset text
+        AI-->>API: Markdown audit report
+    else No key or provider call fails
+        API->>API: Generate local CSV / JSON summary
+    end
+    API->>API: Build up to 30 dashboard preview records
+    API-->>UI: JSON containing report and users
+    UI->>UI: Update charts, identity cards, and report viewer
+    UI-->>Analyst: Display the uploaded dataset results
+```
+
+Incident chat follows the same browser-to-Render connection through `POST /api/ai/chat`. The frontend sends the selected incident context and question; the backend returns a response using Gemini or its local template fallback. Chat and customer reporting have different masking behavior, as described in [Gemini and audit configuration](#gemini-and-audit-configuration).
+
+### Frontend-to-backend connection
+
+Set `VITE_API_URL` in the Vercel frontend environment to the deployed Render API base, including `/api`:
+
+```dotenv
+# Template only: replace <your-render-service> with the actual Render hostname.
+VITE_API_URL=https://<your-render-service>.onrender.com/api
+```
+
+This is a configuration template, not the project's verified backend URL. Vite includes this value when building the frontend, so changing it requires a new frontend build/deployment. The code otherwise falls back to `http://localhost:8000/api`, which points to the visitor's own computer when used from a deployed browser.
+
+The backend exposes `/api/health` for API reachability, `/docs` for interactive documentation, and `/openapi.json` for its schema on the Render service origin. The dashboard polls the health endpoint every five seconds; this checks connectivity rather than streaming fresh security events. Keep `GEMINI_API_KEY` and the persistent `AUDIT_ENCRYPTION_KEY` in the backend environment, not in `VITE_*` variables.
 
 ## Run locally
 
@@ -291,7 +377,7 @@ The backend exposes `/api/users/{uid}/drift` and `/api/users/{uid}/stats`, but t
 | `AUDIT_ENCRYPTION_KEY` | Optional persistent Fernet key for audit rationales. Otherwise, the backend creates/uses `backend/.audit_encryption.key`. |
 | `VITE_API_URL` | Frontend API base URL; defaults to `http://localhost:8000/api`. |
 
-The backend reads process environment variables; it does not automatically load a `.env` file. Set the Gemini key in the same terminal before starting the server:
+The FastAPI entry point calls `load_dotenv()` and reads process environment variables. For local development, you can keep server settings in `backend/.env`; on Render, configure them in the service environment. You can also set the Gemini key in the same terminal before starting the server:
 
 ```bash
 export GEMINI_API_KEY="your-server-side-key"
@@ -372,7 +458,7 @@ Output includes `capacity_limit`, `active_occupied`, `available_slots`, `active_
 
 ### Demo verification and deployment boundary
 
-OTP verification includes a fixed `123456` demonstration bypass. Access states and containment recommendations are application/demo behavior; the repository does not integrate a real identity provider or endpoint enforcement service. The API currently has no authentication layer and uses wildcard CORS, so it should remain a local hackathon/demo application until those controls are replaced for deployment.
+OTP verification includes a fixed `123456` demonstration bypass. Access states and containment recommendations are application/demo behavior; the repository does not integrate a real identity provider or endpoint enforcement service. The API currently has no authentication layer and uses wildcard CORS. The published Vercel/Render application is a hackathon demonstration; production use requires replacing those demo controls.
 
 ## Build and verification
 
@@ -396,7 +482,8 @@ The script re-ingests the bundled dataset and modifies demo policy/audit state. 
 
 | Symptom | Check |
 |---|---|
-| Dashboard says API offline | Confirm FastAPI is on port 8000 and `VITE_API_URL` includes `/api`; restart Vite after changing its environment. |
+| Local dashboard says API offline | Confirm FastAPI is on port 8000 and `VITE_API_URL` includes `/api`; restart Vite after changing its environment. |
+| Vercel dashboard says API offline | Check the Render service's `/api/health`, set Vercel's `VITE_API_URL` to the Render HTTPS origin plus `/api`, and rebuild/redeploy the frontend after changing that value. |
 | No identities on first load | Expected: select a customer dataset. Bundled data is not automatically loaded into the UI. |
 | Preview appears but no report | A text file may have been parsed locally even if the backend request failed. Check the API connection and server output. |
 | SQLite “no such table” on enterprise routes | Initialize the optional demo database with `python -m src.cert_engine --ingest`. |
