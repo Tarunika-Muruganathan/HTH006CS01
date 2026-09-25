@@ -6,6 +6,8 @@ VectrGuard is a security operations dashboard built with **React and FastAPI**. 
 
 This README describes the implementation on **`main`**. The backend entry point is [`backend/server.py`](backend/server.py); Streamlit is no longer required.
 
+**Quick navigation:** [Setup](#run-locally) · [Dataset formats](#customer-dataset-format-and-outputs) · [Data visualizations](#data-visualization-guide) · [Gemini configuration](#gemini-and-audit-configuration) · [API reference](#rest-api-reference) · [Verification](#build-and-verification)
+
 ## Features
 
 - Customer uploads through CSV, JSON, text, Excel, or ZIP files.
@@ -154,6 +156,130 @@ The local report summarizes record count, distinct identities, departments, supp
 Customer report generation receives only the current upload text. The upload endpoint does not ingest the file into the enterprise SQLite database or retrain its baselines. A successful new upload replaces the frontend preview; it does not create persistent, selectable dataset history. Refreshing the page clears that preview.
 
 ZIP members are concatenated rather than joined as relational tables. Mixed CSV headers or multiple JSON documents may therefore produce an incomplete offline report or preview. For consistent results, upload one normalized CSV/JSON dataset. The SQLite user, baseline, and queue endpoints are a separate demonstration workflow and do not automatically reflect customer uploads.
+
+## Data visualization guide
+
+The dashboard turns the currently loaded preview records into severity counts, proportions, average risk, and identity-level comparisons. Recharts renders the bar, doughnut, and activity charts; the risk gauge uses SVG, while Framer Motion animates gauges, progress bars, cards, and investigation panels.
+
+### From an uploaded file to the dashboard
+
+```mermaid
+flowchart TD
+    File["Customer CSV / JSON / TXT / Excel / ZIP"] --> API["FastAPI: POST /api/dataset/analyze"]
+    File -. "Text files: local preview" .-> State["React: loaded incident records"]
+    API --> Preview["users: up to 30 preview records"]
+    API --> Report["report: Markdown audit"]
+    Preview --> State
+    State --> Counts["Severity counts and proportions"]
+    Counts --> Cards["Metric cards, bar chart, doughnut chart"]
+    State --> Scores["Average risk and five highest scores"]
+    State --> Table["Searchable incident table and identity cards"]
+    Table --> Detail["Selected incident: gauge, reason, status, context"]
+    Detail --> Chat["Contextual assistant"]
+    Report --> Viewer["Formatted audit report and Copy Report"]
+```
+
+The report and visual preview have different scopes. The report may summarize more records than the dashboard, whose successful backend preview is limited to 30 rows. Repeated `user_id` values are not deduplicated by the dashboard: its counts describe **loaded records**, even where the UI labels them “identities.”
+
+### What each visualization means
+
+| Visualization | Data and calculation | How to read it |
+|---|---|---|
+| Four severity cards | Counts records whose supplied `level` is LOW, MEDIUM, HIGH, or CRITICAL; shows each count and rounded share of all loaded records. | Start here to see the size of each severity group. The cards count levels, even though their titles also mention approval, verification, freezing, or blocking. |
+| **Risk distribution** bar chart | X-axis: four severity levels. Y-axis: number of loaded records in each level. Hover tooltips expose the values. | Compare absolute group sizes; a taller bar means more records in that category. |
+| **Level proportions** doughnut chart | Uses the same severity counts and labels slices with rounded percentages of the recognized categories. | Compare the relative composition of the preview. A percentage is a share of records, not a probability of an attack. |
+| **Avg risk** circular gauge | Rounded arithmetic mean of loaded `risk_score` values. The SVG arc represents the value on a 0–100 scale. | Summarizes the preview, but a low mean can coexist with a few high-scoring records. Check the highest-risk list too. |
+| **Current posture** badge | ELEVATED when any record is CRITICAL; otherwise GUARDED when any is HIGH; otherwise NORMAL. | A quick label derived from the loaded severity categories, not a separate threat model. |
+| **Highest risk** list | Sorts a copy of the loaded records by numeric score, descending, and shows up to five. | Identifies records to inspect first. This list is separate from the backend's capacity-constrained investigation queue. |
+| Incident table score bars | Bar length is the row's score, clamped visually to 0–100; adjacent badges show `level` and `status`. | Compare individual records and open **Investigate** to read the selected record's reason and context. |
+| Identity directory cards | Show each record's identity, department, location, score bar, severity, and status. | Search by user ID, name, department, or location to find a particular identity. |
+| Investigation drawer | Selected record's circular score gauge, severity/status badges, last-seen label, primary reason, and policy text. | Review the explanation alongside the score. The expandable evidence section currently uses record fields and template text, not a fetched factor-attribution chart. |
+
+The identity directory also shows **Total monitored**, **High / critical risk** (numeric score at least 70), and **Awaiting verification** (`status = VERIFYING`). These summaries use all loaded records, independently of the directory search.
+
+### Color and status legend
+
+| Level | Cards, badges, and score bars | Bar/doughnut chart color | Typical status label |
+|---|---|---|---|
+| LOW | Emerald / green | Sky blue (`#38bdf8`) | APPROVED |
+| MEDIUM | Amber / yellow | Amber (`#fbbf24`) | VERIFYING |
+| HIGH | Orange | Orange (`#f97316`) | FROZEN |
+| CRITICAL | Rose / red | Rose (`#f43f5e`) | BLOCKED |
+
+Read the numeric score and text labels as well as the colors. Severity (`level`) and access state (`status`) are separate fields and can differ in uploaded data. A risk score displayed out of 100 is not a calibrated confidence percentage.
+
+There is currently a boundary mismatch between components: the circular gauge changes color at **30, 70, and 95**, dashboard policy cards display **0–30 / 31–69 / 70–94 / 95–100**, and the structured backend assessment uses **0–30 / 31–70 / 71–95 / 96–100**. Uploaded level labels drive the category charts. This README documents the existing behavior rather than implying that all visual thresholds are already unified.
+
+### Worked example: the four-record CSV above
+
+With one record in each supplied severity category, the displayed distribution is:
+
+```mermaid
+pie showData
+    title Example preview: four supplied records
+    "LOW" : 1
+    "MEDIUM" : 1
+    "HIGH" : 1
+    "CRITICAL" : 1
+```
+
+This is an illustration calculated from the sample CSV, not a screenshot or a live production chart. Its expected dashboard values are:
+
+| Measure | Expected value |
+|---|---|
+| Loaded records | 4 |
+| LOW / MEDIUM / HIGH / CRITICAL | 1 each; 25% each |
+| Average risk | `round((18 + 54 + 84 + 98) / 4) = 64` |
+| High plus critical records | 2, representing 50% of this preview |
+| Current posture | ELEVATED, because a CRITICAL record is present |
+| Highest-risk ordering | EMP928 → EMP302 → EMP205 → EMP101 |
+| Awaiting verification | 1, from EMP205's supplied VERIFYING status |
+
+The dashboard calculations are:
+
+```text
+count(level) = number of loaded records with that level
+card share  = round(100 × count(level) / loaded record count)
+average risk = round(sum(loaded risk scores) / loaded record count)
+```
+
+Use the four supported level names consistently. Unrecognized labels are excluded from severity counts, while the records still affect total counts and the average. For valid labels, the doughnut shares and severity-card shares describe the same distribution, subject to rounding.
+
+### Which panels are based on data, and which are demonstrations?
+
+| Panel | Current source | Interpretation |
+|---|---|---|
+| Severity cards, risk bar/doughnut charts, score gauges, highest-risk list | Loaded preview fields and frontend calculations. | These reflect the current preview, including any supplied scores or parser defaults. |
+| **24-Hour activity stream** | `generateTimelineData()` creates random hourly values influenced by the number of loaded records. | A demonstration chart. Its cyan events, amber anomalies, and rose dashed blocked series do not aggregate uploaded timestamps. |
+| **Live event feed** | The first eight preview records, with generated timestamps and cycling event types. | User IDs/reasons come from preview rows; event times and categories are illustrative. |
+| MITRE ATT&CK heatstrip | Random tactic hit counts and active flags. | A presentation element, not measured technique coverage for the upload. |
+| System health tiles | Static labels and a generated event-rate value of `loaded record count × 47`. | These are not backend throughput or model-health measurements. |
+| API connection and last-sync indicator | A request to `/api/health` every five seconds. | Confirms API reachability; it does not refresh uploaded records or stream new telemetry. |
+
+The colored distribution strip in the decision panel assigns every category a minimum visible width of 3%, including zero-count categories. Use the numeric cards and bar/doughnut tooltips for exact quantities.
+
+The backend exposes `/api/users/{uid}/drift` and `/api/users/{uid}/stats`, but the current customer dashboard does not request them to populate these panels. Its 24-hour demo chart should not be read as the SQLite engine's 30-day drift history.
+
+### Suggested analyst walkthrough
+
+1. Upload the four-record example and confirm the counts and average shown above.
+2. Compare the bar chart's absolute counts with the doughnut chart's percentages.
+3. Use **Highest risk** to identify the largest score, then locate that record in the incident table.
+4. Apply a severity filter or search by user ID/name. These controls affect the **table only**; summary cards and charts continue to describe the entire loaded preview.
+5. Open **Investigate**, read `primary_reason`, compare score/level/status, and expand the explanation. Use the assistant for questions about that selected context.
+6. Review the audit report for its broader summary. A report's total-record count can exceed the preview count shown in the dashboard.
+
+### Visualization source files
+
+| File | Responsibility |
+|---|---|
+| [`DashboardView.jsx`](frontend/src/views/DashboardView.jsx) | Severity aggregation, charts, posture, highest-risk list, filtering, and demo activity/MITRE panels. |
+| [`MetricCard.jsx`](frontend/src/components/MetricCard.jsx) | Category totals, percentages, and animated share bars. |
+| [`RiskGauge.jsx`](frontend/src/components/RiskGauge.jsx) | Circular SVG score gauge and score-based color thresholds. |
+| [`RiskBadge.jsx`](frontend/src/components/RiskBadge.jsx) / [`StatusBadge.jsx`](frontend/src/components/StatusBadge.jsx) | Severity and access-state text/color encoding. |
+| [`UsersView.jsx`](frontend/src/views/UsersView.jsx) | Searchable identity cards and directory summary metrics. |
+| [`DatasetUpload.jsx`](frontend/src/components/DatasetUpload.jsx) | File parsing, preview loading, report request, and Markdown report viewer. |
+| [`App.jsx`](frontend/src/App.jsx) | Shared loaded-record state, incident drawer, API health polling, and assistant context. |
 
 ## Gemini and audit configuration
 
