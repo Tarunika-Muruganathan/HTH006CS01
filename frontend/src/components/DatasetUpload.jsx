@@ -97,9 +97,6 @@ export default function DatasetUpload({ onLoad }) {
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 Customer Dataset Processing & Audit
-                <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-400 border border-cyan-500/20">
-                  Guardrailed AI
-                </span>
               </h3>
               <p className="text-xs text-slate-500">
                 Upload customer logs (JSON or CSV). Isolated analysis ensures existing models remain unaffected.
@@ -118,7 +115,7 @@ export default function DatasetUpload({ onLoad }) {
             <input
               ref={inputRef}
               type="file"
-              accept=".json,.csv,.txt"
+              accept=".json,.csv,.txt,.zip"
               className="hidden"
               onChange={handleFile}
             />
@@ -135,7 +132,7 @@ export default function DatasetUpload({ onLoad }) {
             )}
             {(status === 'parsing' || reportLoading) && (
               <span className="inline-flex items-center gap-1.5 text-xs text-cyan-300 animate-pulse">
-                <Sparkles className="h-3.5 w-3.5" /> Processing & Guardrailing…
+                <Sparkles className="h-3.5 w-3.5" /> Processing & Auditing…
               </span>
             )}
 
@@ -167,7 +164,7 @@ export default function DatasetUpload({ onLoad }) {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-cyan-400" />
                 <h2 className="text-base font-bold text-white">
-                  Guardrailed Dataset Security Audit
+                  Dataset Security Audit
                 </h2>
               </div>
               <button

@@ -13,6 +13,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import re
+import zipfile
+import io
 
 # Ensure backend root is on sys.path
 BACKEND_ROOT = Path(__file__).resolve().parent
@@ -457,12 +459,46 @@ def create_audit(payload: AuditPayload):
 @app.post("/api/dataset/analyze")
 async def analyze_dataset(file: UploadFile = File(...)):
     """
-    Accepts a customer-uploaded CSV/JSON dataset and runs it through
+    Accepts a customer-uploaded CSV/JSON or ZIP dataset and runs it through
     a strictly guardrailed Gemini model that ONLY responds based on
     the uploaded data — never mixing in existing enterprise logs.
+    Includes security checks to prevent malicious code injection via zip bombs
+    or directory traversal.
     """
     content = await file.read()
-    text_content = content.decode("utf-8")
+    
+    # Secure ZIP extraction logic
+    if file.filename.endswith(".zip"):
+        MAX_UNCOMPRESSED_SIZE = 500 * 1024 * 1024  # 500 MB limit against zip bombs
+        total_size = 0
+        text_content = ""
+        
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as zf:
+                for file_info in zf.infolist():
+                    # Prevent directory traversal (Zip Slip)
+                    if ".." in file_info.filename or file_info.filename.startswith("/"):
+                        continue
+                    
+                    # Prevent Zip Bomb
+                    total_size += file_info.file_size
+                    if total_size > MAX_UNCOMPRESSED_SIZE:
+                        raise HTTPException(status_code=400, detail="Zip file too large (Zip Bomb protection).")
+                    
+                    # Extract only safe file types
+                    if file_info.filename.endswith((".csv", ".json", ".txt")):
+                        extracted_bytes = zf.read(file_info)
+                        text_content += extracted_bytes.decode("utf-8", errors="replace") + "\n"
+                        
+            if not text_content:
+                raise HTTPException(status_code=400, detail="No valid CSV/JSON/TXT files found in the zip.")
+                
+        except zipfile.BadZipFile:
+            raise HTTPException(status_code=400, detail="Invalid zip file.")
+    else:
+        # Standard uncompressed file
+        text_content = content.decode("utf-8", errors="replace")
+
     report = analyze_customer_dataset(text_content)
     return {"report": report}
 
