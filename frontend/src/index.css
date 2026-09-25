@@ -53,6 +53,16 @@ body {
     #030712;
   background-size: 40px 40px, 40px 40px, auto, auto, auto, auto, auto;
   background-attachment: fixed;
+  animation: grid-scroll 25s linear infinite;
+}
+
+@keyframes grid-scroll {
+  0% {
+    background-position: 0px 0px, 0px 0px, center, center, center, center, center;
+  }
+  100% {
+    background-position: 40px 40px, 40px 40px, center, center, center, center, center;
+  }
 }
 
 button, input, select, textarea {

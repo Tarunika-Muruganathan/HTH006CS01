@@ -12,6 +12,7 @@ import random
 import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
+from .crypto_utils import encrypt_text, decrypt_text
 
 # Project root directory
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -499,10 +500,14 @@ def log_audit_action(user_id: str, analyst: str, action_taken: str, previous_sta
     conn = get_db_connection(db_file)
     cursor = conn.cursor()
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Encrypt the sensitive rationale before saving
+    encrypted_rationale = encrypt_text(rationale)
+    
     cursor.execute("""
         INSERT INTO audit_logs (timestamp, user_id, analyst, action_taken, previous_status, new_status, rationale)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (now_str, user_id, analyst, action_taken, previous_status, new_status, rationale))
+    """, (now_str, user_id, analyst, action_taken, previous_status, new_status, encrypted_rationale))
 
     # Also update the user_policy_state table
     cursor.execute("""
@@ -529,7 +534,16 @@ def get_audit_history(user_id: Optional[str] = None, limit: int = 50, db_file: O
         """, (limit,))
     rows = cursor.fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+    
+    # Decrypt sensitive rationale fields before returning
+    results = []
+    for r in rows:
+        d = dict(r)
+        if "rationale" in d:
+            d["rationale"] = decrypt_text(d["rationale"])
+        results.append(d)
+        
+    return results
 
 
 def verify_otp_step_up(user_id: str, entered_code: str, db_file: Optional[Path] = None) -> Tuple[bool, str]:
