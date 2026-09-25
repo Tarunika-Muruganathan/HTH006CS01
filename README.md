@@ -2,6 +2,8 @@
 
 **Hack the Horizon · HTH-CS-07 · THE ALGORITHMISTS**
 
+**Live dashboard:** [Open VectrGuard](https://vectrguard-dashboard.vercel.app/)
+
 VectrGuard is a security operations dashboard built with **React and FastAPI**. Analysts can upload customer telemetry, read a security audit report, inspect identity risk and policy states, and ask an assistant about a selected incident.
 
 This README describes the implementation on **`main`**. The backend entry point is [`backend/server.py`](backend/server.py); Streamlit is no longer required.
