@@ -16,51 +16,60 @@ export default function DatasetUpload({ onLoad }) {
     if (!file) return
     setStatus('parsing')
     try {
-      const text = await file.text()
       let normalized = []
 
-      // Try JSON parsing
-      try {
-        const data = JSON.parse(text)
-        const items = Array.isArray(data) ? data : data?.records || data?.items || []
-        normalized = items.map((item) => ({
-          user_id: item.user_id ?? item.userId ?? item.employee_id ?? 'UNKNOWN',
-          name: item.name ?? item.user_name ?? 'Unknown',
-          department: item.department ?? item.dept ?? 'Unknown',
-          risk_score: Number(item.risk_score ?? item.score ?? 0),
-          level: String(item.level ?? item.risk_level ?? 'LOW').toUpperCase(),
-          location: item.location ?? item.source_location ?? 'Unknown',
-          primary_reason: item.primary_reason ?? item.reason ?? item.explanation ?? 'Anomaly detected',
-          status: String(item.status ?? 'APPROVED').toUpperCase(),
-          last_seen: item.last_seen ?? item.timestamp ?? 'just now',
-        }))
-      } catch {
-        // If CSV, basic normalization
-        const lines = text.split('\n').filter(Boolean)
-        if (lines.length > 1) {
-          const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-          normalized = lines.slice(1, 30).map((line, idx) => {
-            const vals = line.split(',')
-            const getVal = (key) => {
-              const i = headers.indexOf(key)
-              return i !== -1 ? vals[i]?.trim() : null
+      // Only attempt local parsing for text files to render previews
+      const isTextFile = !file.name.endsWith('.zip') && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')
+
+      if (isTextFile) {
+        try {
+          const text = await file.text()
+          // Try JSON parsing
+          try {
+            const data = JSON.parse(text)
+            const items = Array.isArray(data) ? data : data?.records || data?.items || []
+            normalized = items.map((item) => ({
+              user_id: item.user_id ?? item.userId ?? item.employee_id ?? 'UNKNOWN',
+              name: item.name ?? item.user_name ?? 'Unknown',
+              department: item.department ?? item.dept ?? 'Unknown',
+              risk_score: Number(item.risk_score ?? item.score ?? 0),
+              level: String(item.level ?? item.risk_level ?? 'LOW').toUpperCase(),
+              location: item.location ?? item.source_location ?? 'Unknown',
+              primary_reason: item.primary_reason ?? item.reason ?? item.explanation ?? 'Anomaly detected',
+              status: String(item.status ?? 'APPROVED').toUpperCase(),
+              last_seen: item.last_seen ?? item.timestamp ?? 'just now',
+            }))
+          } catch {
+            // If CSV, basic normalization
+            const lines = text.split('\n').filter(Boolean)
+            if (lines.length > 1) {
+              const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+              normalized = lines.slice(1, 30).map((line, idx) => {
+                const vals = line.split(',')
+                const getVal = (key) => {
+                  const i = headers.indexOf(key)
+                  return i !== -1 ? vals[i]?.trim() : null
+                }
+                return {
+                  user_id: getVal('user_id') || `CUST-${idx + 101}`,
+                  name: getVal('name') || `User ${idx + 101}`,
+                  department: getVal('department') || 'Enterprise',
+                  risk_score: Number(getVal('risk_score') || 45),
+                  level: getVal('level') || 'MEDIUM',
+                  location: getVal('location') || 'Customer Telemetry',
+                  primary_reason: getVal('primary_reason') || 'Customer dataset ingestion event',
+                  status: getVal('status') || 'VERIFYING',
+                  last_seen: 'just now',
+                }
+              })
             }
-            return {
-              user_id: getVal('user_id') || `CUST-${idx + 101}`,
-              name: getVal('name') || `User ${idx + 101}`,
-              department: getVal('department') || 'Enterprise',
-              risk_score: Number(getVal('risk_score') || 45),
-              level: getVal('level') || 'MEDIUM',
-              location: getVal('location') || 'Customer Telemetry',
-              primary_reason: getVal('primary_reason') || 'Customer dataset ingestion event',
-              status: getVal('status') || 'VERIFYING',
-              last_seen: 'just now',
-            }
-          })
+          }
+        } catch (err) {
+          console.warn("Local parse error", err)
         }
       }
 
-      if (normalized.length > 0) {
+      if (isTextFile && normalized.length > 0) {
         onLoad?.(normalized)
       }
 
@@ -75,6 +84,10 @@ export default function DatasetUpload({ onLoad }) {
         })
         if (res.data?.report) {
           setReport(res.data.report)
+        }
+        // If it was a binary file (or even a text file) and the backend parsed users, load them!
+        if (res.data?.users && res.data.users.length > 0) {
+          onLoad?.(res.data.users)
         }
       } catch (err) {
         console.warn('Backend dataset analyze failed, continuing with client parse:', err)

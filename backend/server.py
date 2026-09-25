@@ -15,6 +15,7 @@ import os
 import re
 import zipfile
 import io
+import json
 import pandas as pd
 
 # Ensure backend root is on sys.path
@@ -516,7 +517,35 @@ async def analyze_dataset(file: UploadFile = File(...)):
         text_content = content.decode("utf-8", errors="replace")
 
     report = analyze_customer_dataset(text_content)
-    return {"report": report}
+    
+    # Generate a preview of users to populate the frontend dashboard UI
+    parsed_users = []
+    try:
+        content_sample = text_content.strip()
+        items = []
+        if content_sample.startswith("[") or content_sample.startswith("{"):
+            data = json.loads(text_content)
+            items = data if isinstance(data, list) else data.get("records", data.get("items", []))
+        else:
+            df = pd.read_csv(io.StringIO(text_content), nrows=30)
+            items = df.to_dict(orient="records")
+            
+        for idx, item in enumerate(items[:30]):
+            parsed_users.append({
+                "user_id": str(item.get("user_id", item.get("userId", f"CUST-{idx+101}"))),
+                "name": str(item.get("name", item.get("user_name", f"User {idx+101}"))),
+                "department": str(item.get("department", item.get("dept", "Enterprise"))),
+                "risk_score": int(item.get("risk_score", item.get("score", 45)) or 45),
+                "level": str(item.get("level", item.get("risk_level", "MEDIUM")) or "MEDIUM").upper(),
+                "location": str(item.get("location", item.get("source_location", "Customer Telemetry"))),
+                "primary_reason": str(item.get("primary_reason", item.get("reason", "Customer dataset ingestion event"))),
+                "status": str(item.get("status", "VERIFYING") or "VERIFYING").upper(),
+                "last_seen": "just now",
+            })
+    except Exception as e:
+        print(f"[!] Failed to parse preview users for frontend: {e}")
+
+    return {"report": report, "users": parsed_users}
 
 
 # =============================================================================
